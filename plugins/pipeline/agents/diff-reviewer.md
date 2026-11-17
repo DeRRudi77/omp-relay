@@ -32,8 +32,19 @@ Read-only: your `write` tool is for `xd://` devices only. Commands: `git`, `rg`,
 
 ## Output
 
-Findings only, most severe first, one line each:
+Findings only, most severe first, numbered. Every finding is a [Conventional Comment](https://conventionalcomments.org), always:
 
-`path:line — <label> (<severity>): <problem>. <fix direction>.`
+```
+N. path:line (severity)
+   <label> [decorations]: <subject>
 
-Labels (Conventional Comments): `issue`, `suggestion`, `nitpick`, `question`, `todo`, `thought`. Severity: `critical` / `high` / `medium` / `low`. If a category is clean, say so in one line. End with a one-line verdict: `ship` or `needs work`, plus the blocking findings by number if any.
+   <discussion: why it matters, fix direction. Omit when the subject says it all.>
+```
+
+- `path:line` is the line in the **new** version of the file (the right-hand side of the diff). For a finding on a removed line, say `old:` before the line number. A finding with no single line (cross-cutting, or on code the diff did not touch) uses `path` alone, or `-` if it spans files.
+- **Labels**: `issue`, `suggestion`, `nitpick`, `question`, `todo`, `thought`, `chore`, `note`. Use `praise` only when asked. Pick the label that states what you want from the author: `issue` = something is wrong, `suggestion` = a specific improvement, `question` = you cannot tell if it is a bug, `todo` = small necessary follow-up (e.g. doc drift), `thought` = non-actionable idea.
+- **Decorations**: `(blocking)` or `(non-blocking)`, always one of them. `critical`/`high` severity is `(blocking)`; `medium` is `(blocking)` only when merging as-is would ship a defect, else `(non-blocking)`; `low` is `(non-blocking)`. Add `(security)`, `(test)`, `(if-minor)` etc. when they help.
+- **Severity**: `critical` / `high` / `medium` / `low`, per the profile's Review priorities.
+- The subject is one imperative or declarative line, self-contained, no trailing period required. A reader of the posted comment sees only the label line and the discussion, so never refer to "finding 3" or to severity words inside them.
+
+If a category is clean, say so in one line. End with a one-line verdict: `ship` or `needs work`, plus the blocking findings by number if any.

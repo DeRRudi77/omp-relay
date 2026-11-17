@@ -7,7 +7,7 @@ Repo-agnostic change pipelines for omp. An orchestrator skill dispatches special
 | `/feature` | investigate → implement → test → review → docs-sync → commit and PR/MR |
 | `/bug` | like `/feature`, but a failing repro test must exist (red) before any fix is written |
 | `/implement` | implement an approved plan in a worktree, no test/review/docs pipeline |
-| `/review` | read-only review of a diff, branch, worktree or file |
+| `/review` | read-only review of a diff, branch, worktree, file, or PR/MR; findings are Conventional Comments, placed inline on a PR/MR |
 | `/grug` | complexity review |
 | `/pipeline-init` | create or refresh a repo's `.omp/pipeline.md` profile |
 | `/commit-and-request` | commit (short Conventional Commits), push, open a PR (GitHub) or MR (GitLab, others) with a CLI-to-API fallback; also what `/feature` and `/bug` end with |
