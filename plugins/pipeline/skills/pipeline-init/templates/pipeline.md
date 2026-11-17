@@ -71,7 +71,9 @@ Only if the changed surface can be exercised at runtime (read by the `bug` skill
 
 - **Commit style**: <Conventional Commits? what the type drives (release bump)?>
 - **Base branch**: <main>
-- **PR/MR recipe**: <exact command, or "default: gh pr create / glab mr create">
+- **PR/MR recipe**: <exact command; omit to use `gh pr create` / `glab mr create` with an API fallback>
+- **Attribution**: <omit for none; or the exact trailer the repo requires>
+- **Prose pass**: <omit for none; or a skill name (e.g. `humanizer`) to run commit/PR text through>
 
 ## Tracker
 

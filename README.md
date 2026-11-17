@@ -10,6 +10,7 @@ Repo-agnostic change pipelines for omp. An orchestrator skill dispatches special
 | `/review` | read-only review of a diff, branch, worktree or file |
 | `/grug` | complexity review |
 | `/pipeline-init` | create or refresh a repo's `.omp/pipeline.md` profile |
+| `/commit-and-request` | commit (short Conventional Commits), push, open a PR (GitHub) or MR (GitLab, others) with a CLI-to-API fallback; also what `/feature` and `/bug` end with |
 
 Agents: `investigator`, `bug-reproducer`, `implementer`, `test-writer`, `diff-reviewer`, `docs-sync`, `grug`.
 
@@ -33,15 +34,17 @@ Run `/reload-plugins` in a running session.
   ```
 
 - `git`. `wtp` is used for worktrees when the repo has a `.wtp.yml`; otherwise plain `git worktree`.
-- `gh` or `glab` for opening the PR/MR, unless the repo's profile gives its own recipe.
+- `gh` or `glab` for opening the PR/MR, unless the repo's profile gives its own recipe. If the CLI is missing or fails, `/commit-and-request` falls back to the forge's API through the same tool.
 
 ## Configuration: `.omp/pipeline.md`
 
-The plugin has no settings. Everything repo-specific lives in `<repo>/.omp/pipeline.md`, which the skills and agents read first. Without it they fall back to the repo's `AGENTS.md` / `CLAUDE.md`. Run `/pipeline-init` to draft one from the repo, or start from [the template](plugins/pipeline/skills/pipeline-init/templates/pipeline.md).
+The plugin has no settings of its own. omp's plugin settings (`omp plugin config`) are for extension modules; skills are plain markdown and cannot read them, and the things that vary here (gate command, PR recipe, tracker) differ per repo anyway. Everything lives in `<repo>/.omp/pipeline.md`, which the skills and agents read first. Without it they fall back to the repo's `AGENTS.md` / `CLAUDE.md`. Run `/pipeline-init` to draft one from the repo, or start from [the template](plugins/pipeline/skills/pipeline-init/templates/pipeline.md).
 
 Sections: Gate, Layers, Hard rules, Test conventions, Review priorities, Complexity hot spots, Docs map, Verify, Delivery, Tracker, Worktree, Conditional skills. All optional.
 
 Ticket trackers are not built in. A `## Tracker` section tells the skills how to detect, fetch and update tickets with whatever MCP tools you have mounted; see [tracker.md](plugins/pipeline/skills/feature/references/tracker.md).
+
+Delivery settings (`## Delivery`): commit style, base branch, an exact PR/MR recipe, attribution trailer, and an optional prose-pass skill. `/commit-and-request` reads them; see its `Settings` table for defaults.
 
 ## Updating
 

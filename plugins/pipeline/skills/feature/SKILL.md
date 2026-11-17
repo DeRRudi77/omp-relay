@@ -56,8 +56,7 @@ Update docs the change made inaccurate, per the profile's **Docs map**. "Nothing
 
 ### 8. Commit and PR/MR
 **Confirm with the user first** (`ask`); this pushes a branch and opens a PR/MR.
-- Commit from inside the worktree. Use Conventional Commits when the profile or `git log` shows that style; the type must match the real blast radius (behaviour change = `feat`/`fix`, not `chore`).
-- Push and open the PR/MR with the guidance's PR/MR recipe (profile **Delivery** section, or what `AGENTS.md` / `CLAUDE.md` / `CONTRIBUTING.md` says). If there is none, pick by `git remote get-url origin`: GitHub → `gh pr create`, GitLab → `glab mr create`; use a `commit-and-pr` / `commit-and-mr` skill instead if one is installed.
+- Follow `skill://commit-and-request`, from inside the worktree and with the user's approval to push already given: commit, push, open the PR/MR. Its Delivery settings come from the profile; the commit type must match the real blast radius (behaviour change = `feat`/`fix`, not `chore`).
 - Capture the URL. Run the tracker **Review** event (comment the URL, set the review status), if the input was a ticket and the repo configures one. Never block the change on it.
 
 ### 9. Finalize

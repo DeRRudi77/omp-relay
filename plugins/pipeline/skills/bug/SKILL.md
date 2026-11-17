@@ -73,9 +73,7 @@ Update docs the fix made inaccurate, per the profile's **Docs map**, including a
 
 ### 10. Commit and PR/MR
 **Confirm with the user first** (`ask`); this pushes a branch and opens a PR/MR.
-- Commit from inside the worktree. Type is **`fix`** (`fix!` if breaking), in the repo's Conventional Commits style, e.g. `fix(auth): reject expired refresh tokens`. Commit messages and the PR/MR body describe the change; they never mention the tooling that produced it.
-- Push and open the PR/MR with the guidance's recipe (profile **Delivery**, or `AGENTS.md` / `CLAUDE.md` / `CONTRIBUTING.md`). If there is none, pick by `git remote get-url origin`: GitHub → `gh pr create`, GitLab → `glab mr create`; use a `commit-and-pr` / `commit-and-mr` skill instead if one is installed.
-- PR/MR description must include: expected-vs-actual symptom, root cause, and the repro test that now guards it.
+- Follow `skill://commit-and-request`, from inside the worktree and with the user's approval to push already given: commit, push, open the PR/MR. Pass it: commit type **`fix`** (`fix!` if breaking), e.g. `fix(auth): reject expired refresh tokens`; and that the description must include the expected-vs-actual symptom, the root cause, and the repro test that now guards it.
 - Capture the URL. Run the tracker **Review** event (comment the URL, set the review status), if the input was a ticket and the repo configures one. Never block the fix on it.
 
 ### 11. Finalize
