@@ -18,7 +18,7 @@ Resolve `PROFILE` exactly as `skill://relay-feature` does (read its "Project gui
 
 ## Orchestration contract
 
-- Phases run **in order**, one `task` call each, with `agent` set explicitly: `relay-investigator` → `relay-bug-reproducer` → `relay-implementer` → `relay-test-writer` → (runtime verify) → `relay-diff-reviewer` → `relay-docs-sync`. Each consumes the previous phase's output. Dispatch, then wait for the result; never poll. Never substitute the bundled `scout` / `task` / `reviewer` for a named agent (the runtime verify step is the one exception, below).
+- Phases run **in order**, one `task` call each, with `agent` set explicitly: `relay-investigator` → `relay-bug-reproducer` → `relay-implementer` → `relay-test-writer` → (`relay-verifier`, conditional) → `relay-diff-reviewer` → `relay-docs-sync`. Each consumes the previous phase's output. Dispatch, then wait for the result; never poll. Never substitute the bundled `scout` / `task` / `reviewer` for a named agent.
 - Every `task` item carries: a self-contained `task`, a `solutionSpace`, and a shared `context` containing `PROFILE` verbatim, the previous phase's output, and (once the worktree exists) this line verbatim:
 
   **"Work inside the worktree at `<WORKTREE_PATH>`. All file paths, `cwd` settings, and tool calls must target that directory, not the main checkout."**
@@ -61,9 +61,9 @@ Pass the approved plan, the investigator's trace, and the repro test's path and 
 - Leave the repro assertion intact; it may be moved or renamed only if reported.
 If red on the **implementation**, hand it back to the implementer (step 5) and re-run this step.
 
-### 7. Runtime verify (conditional)
-Only when the bug is observable at runtime (UI, HTTP, CLI) **and** the profile or `AGENTS.md` / `CLAUDE.md` gives a way to run the changed surface (a `## Verify` section, dev-server command, or equivalent). Otherwise skip and say so; the repro test and gate are the proof.
-Dispatch the bundled `task` agent (no named agent has browser access) to drive the **originally reported flow** from inside `WORKTREE_PATH` and report whether the symptom is gone and nothing new broke (errors, console output, isolation). It must not edit code. If broken, hand the finding to the implementer (step 5) and re-run 6-7.
+### 7. Runtime verify (conditional): `relay-verifier`
+Only when the bug is observable at runtime (UI, HTTP, CLI) **and** the profile's `## Verify` section, or `AGENTS.md` / `CLAUDE.md`, says how to run the app. Otherwise skip and say so; the repro test and gate are the proof.
+Ask it to drive the **originally reported flow** from inside `WORKTREE_PATH` and report whether the symptom is gone and nothing new broke (errors, console output, isolation). If it comes back **broken**, hand the finding to the implementer (step 5) and re-run 6-7. **could-not-verify** is not a pass: tell the user and carry on only with their agreement.
 
 ### 8. Review: `relay-diff-reviewer`
 Audit the diff against the profile's **Review priorities**. Ask it explicitly to judge whether the fix addresses the root cause or only masks the symptom, and whether the repro test would have caught the original bug. Route **blocking** (critical/high) findings back to the implementer (step 5) and repeat 6-8 until clean. After three rounds without convergence, stop and show the user the open findings.

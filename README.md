@@ -4,15 +4,16 @@ Repo-agnostic change pipelines for omp. An orchestrator skill dispatches special
 
 | Skill | What it does |
 |---|---|
-| `/relay-feature` | investigate → implement → test → review → docs-sync → commit and PR/MR |
+| `/relay-feature` | investigate → implement → complexity check → test → browser verify (when runnable) → review → docs-sync → commit and PR/MR |
 | `/relay-bug` | like `/relay-feature`, but a failing repro test must exist (red) before any fix is written |
 | `/relay-implement` | implement an approved plan in a worktree, no test/review/docs pipeline |
 | `/relay-review` | read-only review of a diff, branch, worktree, file, or PR/MR; findings are Conventional Comments, placed inline on a PR/MR |
 | `/relay-grug` | complexity review |
+| `/relay-verify` | drive a change in a real browser (omp's own isolated one) to confirm it renders, behaves, has no new console errors, and respects isolation boundaries |
 | `/relay-init` | create or refresh a repo's `.omp/relay.md` profile |
 | `/relay-commit` | commit (short Conventional Commits), push, open a PR (GitHub) or MR (GitLab, others) with a CLI-to-API fallback; also what `/relay-feature` and `/relay-bug` end with |
 
-Agents: `relay-investigator`, `relay-bug-reproducer`, `relay-implementer`, `relay-test-writer`, `relay-diff-reviewer`, `relay-docs-sync`, `relay-grug`.
+Agents: `relay-investigator`, `relay-bug-reproducer`, `relay-implementer`, `relay-test-writer`, `relay-verifier`, `relay-diff-reviewer`, `relay-docs-sync`, `relay-grug`.
 
 Every skill and agent is prefixed `relay-`. omp does not namespace agents, and it gives a clashing skill name to whichever source ranks higher, which would break the skills' links to each other (`skill://relay-feature/references/...`). Invoke a skill as `/skill:relay-bug`.
 
@@ -33,7 +34,7 @@ Run `/reload-plugins` in a running session.
   |---|---|---|
   | `relay_light` | `relay-docs-sync` | small, cheap model |
   | `relay_fast` | `relay-investigator`, `relay-grug` | mid model, medium thinking |
-  | `relay_build` | `relay-implementer`, `relay-test-writer` | mid model, high thinking |
+  | `relay_build` | `relay-implementer`, `relay-test-writer`, `relay-verifier` | mid model, high thinking |
   | `relay_deep` | `relay-diff-reviewer`, `relay-bug-reproducer` | strongest model, high thinking |
 
   ```yaml

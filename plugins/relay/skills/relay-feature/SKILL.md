@@ -1,6 +1,6 @@
 ---
 name: relay-feature
-description: "Full change lifecycle orchestrator for any repo: investigate, implement, test, review, docs-sync via specialist subagents in an isolated git worktree, ending in a Conventional Commit and a PR/MR. Use for /relay-feature, build this, a ticket key or URL, or any MR-sized change. Reads the repo's .omp/relay.md profile for gate, hard rules, and conventions."
+description: "Full change lifecycle orchestrator for any repo: investigate, implement, complexity check, test, browser verify, review, docs-sync via specialist subagents in an isolated git worktree, ending in a Conventional Commit and a PR/MR. Use for /relay-feature, build this, a ticket key or URL, or any MR-sized change. Reads the repo's .omp/relay.md profile for gate, hard rules, and conventions."
 argument-hint: "<change description, or a ticket key / URL>"
 ---
 
@@ -22,7 +22,7 @@ Prefix `PROFILE` with a one-line `Source: <path(s)>` so agents know whether the 
 
 ## Orchestration contract
 
-- Phases run **in order**, one `task` call each, with `agent` set explicitly: `relay-investigator` → `relay-implementer` → `relay-test-writer` → `relay-diff-reviewer` → `relay-docs-sync`. Each consumes the previous phase's output. Dispatch, then wait for the result; never poll.
+- Phases run **in order**, one `task` call each, with `agent` set explicitly: `relay-investigator` → `relay-implementer` → `relay-grug` → `relay-test-writer` → (`relay-verifier`, conditional) → `relay-diff-reviewer` → `relay-docs-sync`. Each consumes the previous phase's output. Dispatch, then wait for the result; never poll.
 - Every `task` item carries: a self-contained `task`, a `solutionSpace` (how open-ended the child's problem is), and a shared `context` containing `PROFILE` verbatim, the previous phase's output, and (once the worktree exists) this line verbatim:
 
   **"Work inside the worktree at `<WORKTREE_PATH>`. All file paths, `cwd` settings, and tool calls must target that directory, not the main checkout."**
@@ -45,22 +45,28 @@ Present a **numbered implementation plan**: files to create/modify, new config k
 ### 4. Implement: `relay-implementer`
 Pass the approved plan and the investigator's findings. Restate the profile's **Hard rules** that apply to this plan. It must run the gate and report the result before finishing.
 
-### 5. Test: `relay-test-writer`
+### 5. Complexity check: `relay-grug`
+Run the grug agent read-only on the diff (`git diff <base>...HEAD` in the worktree) while the change is still cheap to reshape. Pass the profile's **Complexity hot spots**. Relay its findings verbatim, in its voice, ending with its "club here" line. If it names a concrete, behaviour-preserving simplification, `ask` (apply / skip) and on apply send it to the implementer (step 4) as a scoped change. One round only: do not re-run grug after applying. A clean "this is already simple" result is a valid outcome.
+
+### 6. Test: `relay-test-writer`
 Add coverage per the profile's **Test conventions**: happy path, failure path, consumer-visible contract. It runs the gate and returns green. If it reports red on the **implementation** (not the tests), hand the failure back to the implementer (step 4) and re-run this step.
 
-### 6. Review: `relay-diff-reviewer`
-Audit the diff against the profile's **Review priorities**. Route **blocking** (critical/high) findings back to the implementer (step 4) and repeat 5-6 until clean. After three rounds without convergence, stop and show the user the open findings.
+### 7. Verify (conditional): `relay-verifier`
+Only when the change is observable at runtime (UI, HTTP, CLI) **and** the profile's `## Verify` section, or `AGENTS.md` / `CLAUDE.md`, says how to run the app. Otherwise skip and say so; the gate is the proof. Pass the plan, a summary of what changed, and the flow to drive; the profile's Verify section and isolation checks go in `PROFILE`. If it comes back **broken**, hand the repro to the implementer (step 4) and re-run 6-7. **could-not-verify** is not a pass: tell the user and carry on only with their agreement.
 
-### 7. Docs sync: `relay-docs-sync`
+### 8. Review: `relay-diff-reviewer`
+Audit the diff against the profile's **Review priorities**. Route **blocking** (critical/high) findings back to the implementer (step 4) and repeat 6-8 until clean. After three rounds without convergence, stop and show the user the open findings.
+
+### 9. Docs sync: `relay-docs-sync`
 Update docs the change made inaccurate, per the profile's **Docs map**. "Nothing drifted" is a valid result.
 
-### 8. Commit and PR/MR
+### 10. Commit and PR/MR
 **Confirm with the user first** (`ask`); this pushes a branch and opens a PR/MR.
 - Follow `skill://relay-commit`, from inside the worktree and with the user's approval to push already given: commit, push, open the PR/MR. Its Delivery settings come from the profile; the commit type must match the real blast radius (behaviour change = `feat`/`fix`, not `chore`).
 - Capture the URL. Run the tracker **Review** event (comment the URL, set the review status), if the input was a ticket and the repo configures one. Never block the change on it.
 
-### 9. Finalize
+### 11. Finalize
 Report: the chain of phase results, the gate outcome (command + result, from agent output you verified), and the PR/MR URL. Ask whether to merge back or keep the branch open for review.
 
-### 10. Cleanup
+### 12. Cleanup
 Remove the worktree per `skill://relay-feature/references/worktree.md` when the user says it is merged or abandoned. Do **not** clean up while the branch is still wanted.

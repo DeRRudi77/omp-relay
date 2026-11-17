@@ -61,11 +61,13 @@ Where demons hide in this repo (read by `relay-grug`).
 
 ## Verify
 
-Only if the changed surface can be exercised at runtime (read by the `relay-bug` skill's runtime verify step).
+Only if the changed surface can be exercised at runtime (read by the `relay-verifier` agent via `relay-verify`, `relay-feature` and `relay-bug`).
 
 - **Run command**: <e.g. `bin/dev`; from inside the worktree>
 - **Where to reach it**: <URL / domain pattern, esp. if derived from the worktree directory name>
 - **Roles / accounts / seed data** needed to hit typical flows: <...>
+- **Isolation checks**: <the boundaries to probe with a second principal: tenant, role, ownership; which URLs/ids to tamper with and what refusal looks like (e.g. 403 vs 404)>
+- **Recovery**: <the one allowed recovery step per failure (e.g. pending migrations → `<migrate command>`), else a single restart>
 
 ## Delivery
 
