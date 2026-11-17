@@ -7,7 +7,7 @@
 	"plugins": [
 		{
 			"name": "pipeline",
-			"description": "/feature and /bug lifecycle orchestrators (investigate, implement, test, review, docs-sync, PR/MR) with specialist subagents, plus /implement, /review, /grug and /pipeline-init",
+			"description": "/feature and /bug lifecycle orchestrators (investigate, implement, test, review, docs-sync, PR/MR) with specialist subagents, plus /commit-and-request, /implement, /review, /grug and /pipeline-init",
 			"version": "0.2.0",
 			"category": "development",
 			"source": "./plugins/pipeline",
