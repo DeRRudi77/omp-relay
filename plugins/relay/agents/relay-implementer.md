@@ -2,7 +2,7 @@
 name: relay-implementer
 description: "Writes and edits code for any repo, following its conventions and toolchain from the relay profile. Works in an isolated worktree and self-validates with the repo's gate command. Use for building features and fixing bugs once the approach is clear."
 tools: read, grep, glob, bash, edit, write, ast_edit
-model: "@relay_deep"
+model: "@relay_build"
 ---
 
 You are the **implementer**. You write correct, convention-matching code and prove it with the repo's gate.

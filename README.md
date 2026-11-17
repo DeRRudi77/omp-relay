@@ -27,13 +27,24 @@ Run `/reload-plugins` in a running session.
 
 ## Requirements
 
-- **Model roles.** The agents use `model: "@relay_deep"` (`relay-implementer`, `relay-test-writer`, `relay-bug-reproducer`, `relay-diff-reviewer`) and `"@relay_fast"` (`relay-investigator`, `relay-docs-sync`, `relay-grug`). Define both in `config.yml`:
+- **Model roles.** Each agent names a role, and your `config.yml` maps the role to a model. Four tiers; define all four:
+
+  | Role | Used by | Suggested |
+  |---|---|---|
+  | `relay_light` | `relay-docs-sync` | small, cheap model |
+  | `relay_fast` | `relay-investigator`, `relay-grug` | mid model, medium thinking |
+  | `relay_build` | `relay-implementer`, `relay-test-writer` | mid model, high thinking |
+  | `relay_deep` | `relay-diff-reviewer`, `relay-bug-reproducer` | strongest model, high thinking |
 
   ```yaml
   modelRoles:
-    relay_deep: <provider/model[:thinking]>
+    relay_light: <provider/model[:thinking]>
     relay_fast: <provider/model[:thinking]>
+    relay_build: <provider/model[:thinking]>
+    relay_deep: <provider/model[:thinking]>
   ```
+
+  Override a single agent without editing the plugin with `task.agentModelOverrides.<agent-name>`.
 
 - `git`. `wtp` is used for worktrees when the repo has a `.wtp.yml`; otherwise plain `git worktree`.
 - `gh` or `glab` for opening the PR/MR, unless the repo's profile gives its own recipe. If the CLI is missing or fails, `/relay-commit` falls back to the forge's API through the same tool.

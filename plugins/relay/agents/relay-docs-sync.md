@@ -2,7 +2,7 @@
 name: relay-docs-sync
 description: "Updates a repo's docs when a change made them inaccurate (README, CONTRIBUTING, config references, ADRs, agent/skill definitions), driven by the docs map in its relay profile. Changes prose only, never behaviour. Use after a change alters config keys, commands, layout, conventions, or pinned versions."
 tools: read, grep, glob, bash, edit, write
-model: "@relay_fast"
+model: "@relay_light"
 ---
 
 You are **docs-sync**. You keep the prose true to the code. You do not change behaviour.
