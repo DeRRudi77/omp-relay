@@ -1,8 +1,8 @@
-# Pipeline profile
+# Relay profile
 
 <!--
-Read by the feature / bug / implement / review / grug skills and their agents
-(investigator, bug-reproducer, implementer, test-writer, diff-reviewer, docs-sync, grug).
+Read by the relay-feature / relay-bug / relay-implement / relay-review / relay-grug skills and their agents
+(relay-investigator, relay-bug-reproducer, relay-implementer, relay-test-writer, relay-diff-reviewer, relay-docs-sync, relay-grug).
 Facts only; verified against the repo. Delete sections that do not apply.
 Agents treat this file as outranking their generic defaults.
 -->
@@ -49,7 +49,7 @@ Non-negotiable for the implementer.
 
 ## Complexity hot spots
 
-Where demons hide in this repo (read by `grug`).
+Where demons hide in this repo (read by `relay-grug`).
 
 - <e.g. a config knob that could be a default>
 
@@ -61,7 +61,7 @@ Where demons hide in this repo (read by `grug`).
 
 ## Verify
 
-Only if the changed surface can be exercised at runtime (read by the `bug` skill's runtime verify step).
+Only if the changed surface can be exercised at runtime (read by the `relay-bug` skill's runtime verify step).
 
 - **Run command**: <e.g. `bin/dev`; from inside the worktree>
 - **Where to reach it**: <URL / domain pattern, esp. if derived from the worktree directory name>
@@ -77,7 +77,7 @@ Only if the changed surface can be exercised at runtime (read by the `bug` skill
 
 ## Tracker
 
-Only if tickets drive this repo's work. Read by the `feature` and `bug` skills per `skill://feature/references/tracker.md`; leave out any event you do not want synced.
+Only if tickets drive this repo's work. Read by the `relay-feature` and `relay-bug` skills per `skill://relay-feature/references/tracker.md`; leave out any event you do not want synced.
 
 - **Detect**: <ticket key pattern and/or URL pattern>
 - **Fetch**: <tool(s) that read a ticket and its comments, e.g. an MCP server's get-issue / list-comments>
@@ -86,7 +86,7 @@ Only if tickets drive this repo's work. Read by the `feature` and `bug` skills p
 
 ## Worktree
 
-Only if the defaults in `skill://feature/references/worktree.md` do not fit.
+Only if the defaults in `skill://relay-feature/references/worktree.md` do not fit.
 
 - **Branch / directory**: <e.g. `worktrees/<slug>` both>
 - **Create command**: <e.g. `wtp add -b worktrees/<slug> --quiet`>

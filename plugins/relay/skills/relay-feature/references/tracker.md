@@ -1,6 +1,6 @@
 # Tracker sync
 
-Shared by `feature` and `bug`. The skills name no tracker and no tool. The repo says which tracker it uses and how, in the profile's `## Tracker` section (or a tracker convention stated in `AGENTS.md` / `CLAUDE.md`). Tracker sync is **orchestration**: you do it inline, never in a delegated phase.
+Shared by `relay-feature` and `relay-bug`. The skills name no tracker and no tool. The repo says which tracker it uses and how, in the profile's `## Tracker` section (or a tracker convention stated in `AGENTS.md` / `CLAUDE.md`). Tracker sync is **orchestration**: you do it inline, never in a delegated phase.
 
 ## Events
 

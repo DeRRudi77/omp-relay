@@ -1,6 +1,6 @@
 # Worktree isolation
 
-Shared by `feature` and `implement`. Implementation happens in a **git worktree**, never the user's checkout, so several sessions can run on one repo and a half-finished change never blocks the user's `git status`.
+Shared by `relay-feature` and `relay-implement`. Implementation happens in a **git worktree**, never the user's checkout, so several sessions can run on one repo and a half-finished change never blocks the user's `git status`.
 
 A profile `## Worktree` section, or a worktree convention stated in `AGENTS.md` / `CLAUDE.md`, overrides every default below (base branch, branch name, directory, post-create copies, extra cleanup).
 
@@ -25,7 +25,7 @@ echo "$WORKTREE_PATH"
 - Branch is `worktrees/<slug>` unless the profile says otherwise; it branches off `$BASE` (the default branch).
 - If the branch already exists (resuming work): `git -C "$ROOT" worktree add "$WORKTREE_PATH" worktrees/$SLUG`, or `wtp add worktrees/$SLUG --quiet`.
 - Capture the printed absolute path as `WORKTREE_PATH`. If creation fails, stop and report; do not fall back to the main checkout.
-- The main checkout may hold uncommitted files (e.g. a fresh `.omp/pipeline.md`). They are **not** in the worktree. Pass what agents need through the delegation `context`, not by path.
+- The main checkout may hold uncommitted files (e.g. a fresh `.omp/relay.md`). They are **not** in the worktree. Pass what agents need through the delegation `context`, not by path.
 
 ## Work inside it
 

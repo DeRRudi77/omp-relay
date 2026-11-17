@@ -1,6 +1,6 @@
 ---
-name: commit-and-request
-description: "Commit the current work as short Conventional Commits, push a topic branch, and open a pull request (GitHub) or merge request (GitLab, Gitea, Bitbucket, ...) on whatever forge the repo uses. Replaces forge-specific commit-and-pr / commit-and-mr skills. Use for /commit-and-request, commit and PR, commit and MR, open a PR/MR, or ship this. Reads the repo's Delivery settings from .omp/pipeline.md or AGENTS.md / CLAUDE.md. Keeps commit messages and descriptions short."
+name: relay-commit
+description: "Commit the current work as short Conventional Commits, push a topic branch, and open a pull request (GitHub) or merge request (GitLab, Gitea, Bitbucket, ...) on whatever forge the repo uses. Replaces forge-specific commit-and-pr / commit-and-mr skills. Use for /relay-commit, commit and PR, commit and MR, open a PR/MR, or ship this. Reads the repo's Delivery settings from .omp/relay.md or AGENTS.md / CLAUDE.md. Keeps commit messages and descriptions short."
 argument-hint: "<optional: notes for the description, or a ticket key>"
 ---
 
@@ -10,7 +10,7 @@ Two phases: **commit**, then **publish**. Both are governed by one rule, and bot
 
 Resolve once, first match wins per setting:
 
-1. The profile's **Delivery** section in `.omp/pipeline.md` (read it from the main checkout's repo root).
+1. The profile's **Delivery** section in `.omp/relay.md` (read it from the main checkout's repo root).
 2. What the repo's `AGENTS.md` / `CLAUDE.md` / `CONTRIBUTING.md` says about commits, branches, PRs/MRs.
 3. Your user-level instructions already in context (they apply to every repo).
 4. The defaults in this skill.
@@ -25,7 +25,7 @@ Settings this skill reads:
 | **Attribution** | none: no `Co-Authored-By`, no "generated with" line, unless the repo specifies a trailer (then use it verbatim) |
 | **Prose pass** | none; if the setting names a skill (e.g. `humanizer`), run commit subjects/bodies and the PR/MR title/description through it after shortening, preserving syntax, issue references, commands, code blocks and facts |
 
-When another skill (`feature`, `bug`) calls this one, it may also pass the commit type to use, content the description must include, and that the user already approved pushing.
+When another skill (`relay-feature`, `relay-bug`) calls this one, it may also pass the commit type to use, content the description must include, and that the user already approved pushing.
 
 ## The rule: short by default
 
@@ -75,7 +75,7 @@ Budget: ~200 words of prose. One short paragraph of why, then tight bullets. The
    - Otherwise pick the forge from `git remote get-url origin`: GitHub → `gh pr create`; GitLab → `glab mr create`; Gitea/Forgejo → a mounted Gitea MCP's create-pull-request, if any; anything else → the API tool the user has, or the "create pull request" URL that `git push` prints.
    - **If the CLI fails** (not installed, not authenticated, or `glab` rejecting the remote because `~/.ssh/config` rewrites the host), use the forge's API instead of fighting it: `gh api -X POST repos/<owner>/<repo>/pulls -f head=<branch> -f base=<base> -f title=... -f body=...`, or `glab api -X POST "projects/<url-encoded-path>/merge_requests" -f source_branch=<branch> -f target_branch=<base> -f title=... -f description=...` (`%2F` for each `/` in the path). Pass multi-line bodies through a heredoc into a variable. Tell the user which path you took.
 5. Title: the lead commit's subject, or one line spanning the commits. Description: the why, then a short bullet list. Include whatever the calling skill required.
-6. Link the ticket if there is one: a key in the branch name or commits, or one the caller passed. Fetch its title or URL only if you need it, using the tools the repo's `## Tracker` section names (`skill://feature/references/tracker.md`). No ticket, no line; never invent a reference.
+6. Link the ticket if there is one: a key in the branch name or commits, or one the caller passed. Fetch its title or URL only if you need it, using the tools the repo's `## Tracker` section names (`skill://relay-feature/references/tracker.md`). No ticket, no line; never invent a reference.
 7. Report the PR/MR URL. Mention the pipeline only if it is the first run of a new job or expected to fail.
 
 ## Guardrails

@@ -1,16 +1,16 @@
 {
-	"name": "omp-pipeline",
+	"name": "omp-relay",
 	"owner": { "name": "Rutger Gelling" },
 	"metadata": {
-		"description": "Repo-agnostic feature and bug-fix pipelines for omp, driven by a per-repo .omp/pipeline.md profile"
+		"description": "Repo-agnostic feature and bug-fix pipelines for omp, driven by a per-repo .omp/relay.md profile"
 	},
 	"plugins": [
 		{
-			"name": "pipeline",
-			"description": "/feature and /bug lifecycle orchestrators (investigate, implement, test, review, docs-sync, PR/MR) with specialist subagents, plus /commit-and-request, /implement, /review, /grug and /pipeline-init",
-			"version": "0.2.1",
+			"name": "relay",
+			"description": "/relay-feature and /relay-bug lifecycle orchestrators (investigate, implement, test, review, docs-sync, PR/MR) with specialist subagents, plus /relay-commit, /relay-implement, /relay-review, /relay-grug and /relay-init",
+			"version": "0.3.0",
 			"category": "development",
-			"source": "./plugins/pipeline",
+			"source": "./plugins/relay",
 			"keywords": ["workflow", "worktree", "tdd", "review"],
 			"license": "MIT"
 		}

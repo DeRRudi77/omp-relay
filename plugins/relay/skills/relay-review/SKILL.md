@@ -1,10 +1,10 @@
 ---
-name: review
-description: "Review a diff, branch, worktree, file, or a GitHub PR / GitLab MR via the diff-reviewer agent in any repo: blast radius, untested behaviour, config/schema/doc drift, correctness, security. Severity-ranked, written as Conventional Comments; on a PR/MR the comments are placed inline on the diff. Use for /review, review this diff, or review this MR/PR (URL or number)."
+name: relay-review
+description: "Review a diff, branch, worktree, file, or a GitHub PR / GitLab MR via the relay-diff-reviewer agent in any repo: blast radius, untested behaviour, config/schema/doc drift, correctness, security. Severity-ranked, written as Conventional Comments; on a PR/MR the comments are placed inline on the diff. Use for /relay-review, review this diff, or review this MR/PR (URL or number)."
 argument-hint: "<nothing (current diff vs default branch), a branch / worktree path / file, or a PR/MR URL or number>"
 ---
 
-Dispatch the **diff-reviewer** agent on the target in the `User:` text.
+Dispatch the **relay-diff-reviewer** agent on the target in the `User:` text.
 
 ## Steps
 
@@ -12,8 +12,8 @@ Dispatch the **diff-reviewer** agent on the target in the `User:` text.
    - Empty → current diff vs the default branch (`git diff <base>...HEAD` plus `git status`).
    - A branch, worktree path, or file → that. For a worktree, pass its absolute path and say every `cwd` must be there.
    - A **PR/MR** (URL, `#123` / `!123`, or `pr://` / `mr://`) → see "Reviewing a PR/MR" below.
-2. **Guidance.** Resolve `PROFILE` as in `skill://feature/SKILL.md` ("Project guidance"): `.omp/pipeline.md` if present, else `AGENTS.md` and/or `CLAUDE.md`. For a PR/MR, read it from the PR/MR's **base** branch, not the author's head. Pass it verbatim in `context` so the reviewer applies this repo's rules. None: the reviewer uses its generic priorities.
-3. **Dispatch** with `task` (`agent: diff-reviewer`, with a `solutionSpace` like `review defects open; no known bug`). Do not review inline. Tell it the findings must be Conventional Comments (its output format already requires this).
+2. **Guidance.** Resolve `PROFILE` as in `skill://relay-feature/SKILL.md` ("Project guidance"): `.omp/relay.md` if present, else `AGENTS.md` and/or `CLAUDE.md`. For a PR/MR, read it from the PR/MR's **base** branch, not the author's head. Pass it verbatim in `context` so the reviewer applies this repo's rules. None: the reviewer uses its generic priorities.
+3. **Dispatch** with `task` (`agent: relay-diff-reviewer`, with a `solutionSpace` like `review defects open; no known bug`). Do not review inline. Tell it the findings must be Conventional Comments (its output format already requires this).
 4. **Relay the findings verbatim**, most severe first, with the agent's one-line verdict. For a PR/MR, continue to "Placing the comments".
 5. **Offer follow-ups, do not perform them.** Ask before routing blocking findings to the **implementer**, missing coverage to the **test-writer**, or doc drift to **docs-sync**. On someone else's PR/MR there is nothing to route: the comments are the deliverable.
 
