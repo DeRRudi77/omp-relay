@@ -27,6 +27,7 @@ Resolve `PROFILE` exactly as `skill://relay-feature` does (read its "Project gui
 - **Red-before-green gate:** do not dispatch the `relay-implementer` until the `relay-bug-reproducer` returns `REPRODUCED` with verbatim failing output **and you have re-run the narrow test yourself** (`bash`, `cwd=WORKTREE_PATH`) and seen it fail the same way. A passing or setup-crashing test is not a repro; a transcript you cannot corroborate is not evidence.
 - Run orchestration shell commands (worktree create/cleanup, `git status`, the red re-run) yourself with `bash`. Never delegate them.
 - After each phase relay a 2-4 line summary to the user. Verify what you rely on: `git -C <WORKTREE_PATH> status --short` / `diff --stat` after each code-writing phase; do not trust "green" you cannot see in the agent's output.
+- **Rework goes to the implementer.** Any change to the worktree after step 5 (a pre-existing test the fix broke, a test-writer red, a verifier finding, a reviewer finding) is a **new `task` call with `agent: "relay-implementer"`**. The orchestrator never edits files itself, even for a one-line change. The task carries: the approved plan, the repro test's path and name, the specific failure or finding verbatim, the repro-test and root-cause constraints from step 5, an instruction to touch nothing outside that scope, and the gate requirement. Afterwards verify with `git -C <WORKTREE_PATH> diff --stat`.
 
 ## Workflow
 
@@ -56,17 +57,17 @@ Pass the approved plan, the investigator's trace, and the repro test's path and 
 
 ### 6. Regression coverage: `relay-test-writer`
 - Confirm the repro test is now green and the **full gate** passes, not just the repro file. A fix can pass its own repro and break a test in another file; that is what fails CI after push.
-- If the full run shows a **pre-existing** test the fix broke, report it by name with the failure. Do not retarget or delete it silently: route it back to the implementer (step 5) unless it is a genuinely stale assertion that must change with the fix, and say which.
+- If the full run shows a **pre-existing** test the fix broke, report it by name with the failure. Do not retarget or delete it silently: dispatch `relay-implementer` with it (see "Rework goes to the implementer") unless it is a genuinely stale assertion that must change with the fix, and say which.
 - Add coverage around the fix per the profile's **Test conventions**: adjacent edge cases, the inverse case (behaviour that was correct and must stay correct), and tenant/authorization scoping if the fix touched it.
 - Leave the repro assertion intact; it may be moved or renamed only if reported.
-If red on the **implementation**, hand it back to the implementer (step 5) and re-run this step.
+If red on the **implementation**, dispatch `relay-implementer` with the failure (see "Rework goes to the implementer") and re-run this step.
 
 ### 7. Runtime verify (conditional): `relay-verifier`
 Only when the bug is observable at runtime (UI, HTTP, CLI) **and** the profile's `## Verify` section, or `AGENTS.md` / `CLAUDE.md`, says how to run the app. Otherwise skip and say so; the repro test and gate are the proof.
-Ask it to drive the **originally reported flow** from inside `WORKTREE_PATH` and report whether the symptom is gone and nothing new broke (errors, console output, isolation). If it comes back **broken**, hand the finding to the implementer (step 5) and re-run 6-7. **could-not-verify** is not a pass: tell the user and carry on only with their agreement.
+Ask it to drive the **originally reported flow** from inside `WORKTREE_PATH` and report whether the symptom is gone and nothing new broke (errors, console output, isolation). If it comes back **broken**, dispatch `relay-implementer` with the finding (see "Rework goes to the implementer") and re-run 6-7. **could-not-verify** is not a pass: tell the user and carry on only with their agreement.
 
 ### 8. Review: `relay-diff-reviewer`
-Audit the diff against the profile's **Review priorities**. Ask it explicitly to judge whether the fix addresses the root cause or only masks the symptom, and whether the repro test would have caught the original bug. Route **blocking** (critical/high) findings back to the implementer (step 5) and repeat 6-8 until clean. After three rounds without convergence, stop and show the user the open findings.
+Audit the diff against the profile's **Review priorities**. Ask it explicitly to judge whether the fix addresses the root cause or only masks the symptom, and whether the repro test would have caught the original bug. Route **blocking** (critical/high) findings to `relay-implementer` (see "Rework goes to the implementer") and repeat 6-8 until clean. After three rounds without convergence, stop and show the user the open findings.
 
 ### 9. Docs sync: `relay-docs-sync`
 Update docs the fix made inaccurate, per the profile's **Docs map**, including any "gotcha" entry the bug earned. "Nothing drifted" is a valid result.
