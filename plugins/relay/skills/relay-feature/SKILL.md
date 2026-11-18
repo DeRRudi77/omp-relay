@@ -29,6 +29,7 @@ Prefix `PROFILE` with a one-line `Source: <path(s)>` so agents know whether the 
 
 - Remind every agent: use only the toolchain wrappers the profile names; never run forbidden host tools raw.
 - After each phase relay a 2-4 line summary to the user. Verify what you rely on: `git -C <WORKTREE_PATH> status --short` / `diff --stat` after implementer and test-writer; do not trust "green" you cannot see in the agent's output.
+- **Rework goes to the implementer.** Any change to the worktree after step 4 (applying a grug simplification, fixing a test-writer red, a verifier repro, a reviewer finding) is a **new `task` call with `agent: "relay-implementer"`**. The orchestrator never edits files itself, even for a one-line change. The task carries: the approved plan, the specific change or finding verbatim, an instruction to touch nothing outside that scope, and the gate requirement. Afterwards verify with `git -C <WORKTREE_PATH> diff --stat`.
 
 ## Workflow
 
@@ -46,16 +47,16 @@ Present a **numbered implementation plan**: files to create/modify, new config k
 Pass the approved plan and the investigator's findings. Restate the profile's **Hard rules** that apply to this plan. It must run the gate and report the result before finishing.
 
 ### 5. Complexity check: `relay-grug`
-Run the grug agent read-only on the diff (`git diff <base>...HEAD` in the worktree) while the change is still cheap to reshape. Pass the profile's **Complexity hot spots**. Relay its findings verbatim, in its voice, ending with its "club here" line. If it names a concrete, behaviour-preserving simplification, `ask` (apply / skip) and on apply send it to the implementer (step 4) as a scoped change. One round only: do not re-run grug after applying. A clean "this is already simple" result is a valid outcome.
+Run the grug agent read-only on the diff (`git diff <base>...HEAD` in the worktree) while the change is still cheap to reshape. Pass the profile's **Complexity hot spots**. Relay its findings verbatim, in its voice, ending with its "club here" line. If it names a concrete, behaviour-preserving simplification, `ask` (apply / skip). On apply, dispatch `relay-implementer` per "Rework goes to the implementer", with that simplification as the only scope, and have it re-run the gate. One round only: do not re-run grug after applying. A clean "this is already simple" result is a valid outcome.
 
 ### 6. Test: `relay-test-writer`
-Add coverage per the profile's **Test conventions**: happy path, failure path, consumer-visible contract. It runs the gate and returns green. If it reports red on the **implementation** (not the tests), hand the failure back to the implementer (step 4) and re-run this step.
+Add coverage per the profile's **Test conventions**: happy path, failure path, consumer-visible contract. It runs the gate and returns green. If it reports red on the **implementation** (not the tests), dispatch `relay-implementer` with the failure (see "Rework goes to the implementer") and re-run this step.
 
 ### 7. Verify (conditional): `relay-verifier`
-Only when the change is observable at runtime (UI, HTTP, CLI) **and** the profile's `## Verify` section, or `AGENTS.md` / `CLAUDE.md`, says how to run the app. Otherwise skip and say so; the gate is the proof. Pass the plan, a summary of what changed, and the flow to drive; the profile's Verify section and isolation checks go in `PROFILE`. If it comes back **broken**, hand the repro to the implementer (step 4) and re-run 6-7. **could-not-verify** is not a pass: tell the user and carry on only with their agreement.
+Only when the change is observable at runtime (UI, HTTP, CLI) **and** the profile's `## Verify` section, or `AGENTS.md` / `CLAUDE.md`, says how to run the app. Otherwise skip and say so; the gate is the proof. Pass the plan, a summary of what changed, and the flow to drive; the profile's Verify section and isolation checks go in `PROFILE`. If it comes back **broken**, dispatch `relay-implementer` with the repro (see "Rework goes to the implementer") and re-run 6-7. **could-not-verify** is not a pass: tell the user and carry on only with their agreement.
 
 ### 8. Review: `relay-diff-reviewer`
-Audit the diff against the profile's **Review priorities**. Route **blocking** (critical/high) findings back to the implementer (step 4) and repeat 6-8 until clean. After three rounds without convergence, stop and show the user the open findings.
+Audit the diff against the profile's **Review priorities**. Route **blocking** (critical/high) findings to `relay-implementer` (see "Rework goes to the implementer") and repeat 6-8 until clean. After three rounds without convergence, stop and show the user the open findings.
 
 ### 9. Docs sync: `relay-docs-sync`
 Update docs the change made inaccurate, per the profile's **Docs map**. "Nothing drifted" is a valid result.
