@@ -24,6 +24,7 @@ Settings this skill reads:
 | **PR/MR recipe** | an exact command; replaces step 4 of Publish entirely |
 | **Attribution** | none: no `Co-Authored-By`, no "generated with" line, unless the repo specifies a trailer (then use it verbatim) |
 | **Prose pass** | none; if the setting names a skill (e.g. `humanizer`), run commit subjects/bodies and the PR/MR title/description through it after shortening, preserving syntax, issue references, commands, code blocks and facts |
+| **CI watch** | `on`: after opening the PR/MR, watch its pipeline and fix failures (Phase 3). `off` skips it |
 
 When another skill (`relay-feature`, `relay-bug`) calls this one, it may also pass the commit type to use, content the description must include, and that the user already approved pushing.
 
@@ -76,7 +77,30 @@ Budget: ~200 words of prose. One short paragraph of why, then tight bullets. The
    - **If the CLI fails** (not installed, not authenticated, or `glab` rejecting the remote because `~/.ssh/config` rewrites the host), use the forge's API instead of fighting it: `gh api -X POST repos/<owner>/<repo>/pulls -f head=<branch> -f base=<base> -f title=... -f body=...`, or `glab api -X POST "projects/<url-encoded-path>/merge_requests" -f source_branch=<branch> -f target_branch=<base> -f title=... -f description=...` (`%2F` for each `/` in the path). Pass multi-line bodies through a heredoc into a variable. Tell the user which path you took.
 5. Title: the lead commit's subject, or one line spanning the commits. Description: the why, then a short bullet list. Include whatever the calling skill required.
 6. Link the ticket if there is one: a key in the branch name or commits, or one the caller passed. Fetch its title or URL only if you need it, using the tools the repo's `## Tracker` section names (`skill://relay-feature/references/tracker.md`). No ticket, no line; never invent a reference.
-7. Report the PR/MR URL. Mention the pipeline only if it is the first run of a new job or expected to fail.
+7. Report the PR/MR URL, then go to Phase 3. Mention the pipeline only if it is the first run of a new job or expected to fail.
+
+## Phase 3: Watch the pipeline
+
+Publishing is not done until the pipeline for the new PR/MR is green. Watch it and fix failures yourself; do not hand a red pipeline back to the user. Skip only when the **CI watch** setting is `off`, the repo has no CI for this branch (no checks appear after ~2 minutes), or a calling skill said it owns the pipeline.
+
+**Watch.** Block on the pipeline, preferring the forge's own wait over a hand-rolled poll:
+
+- GitHub: `gh pr checks <pr> --watch --fail-fast`
+- GitLab: `glab ci status --live` on the branch, or poll `glab api projects/<id>/merge_requests/<iid>/pipelines` until the head pipeline reaches a terminal state
+- Anything else: poll the forge's API/MCP every 30-60s
+
+Run long waits as a background job or with a generous timeout; do not stop on the first timeout while the pipeline is still running.
+
+**On failure:**
+
+1. Pull the failing job logs (`gh run view --log-failed`, `glab ci trace <job>` or the jobs API). Read the actual error; never guess from the job name.
+2. Classify:
+   - **Infrastructure flake** (runner lost, network/registry timeout, cancelled by system, no code frame in the trace): retry the failed job/pipeline once. A second identical failure is a real failure.
+   - **Caused by this change**: fix the root cause in the code, run the narrowest local check that reproduces it, commit (Phase 1 rules, `fix:` or `test:` as true to the change, or `style:`/`chore:` for lint/format), `git push`. Never force-push; never skip hooks or disable/WIP a test to get green.
+   - **Unrelated or pre-existing** (fails the same way on the base branch, or touches code the diff does not): do not fix it inside this change. Report it in chat with the job name and the evidence.
+3. Watch the new pipeline and repeat.
+
+**Stop conditions:** pipeline green; three fix attempts on the same job without progress; a failure that needs a user decision (credentials, product behaviour, scope); or an unrelated failure. Then report in chat: PR/MR URL, which job failed, the cause, what you tried. Green: one line, nothing more.
 
 ## Guardrails
 
