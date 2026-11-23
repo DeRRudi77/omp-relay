@@ -17,6 +17,7 @@ Agents treat this file as outranking their generic defaults.
 - **Narrow test**: `<command to run one test file / filter>`
 - **Toolchain rules**: <how tools are run (wrappers, containers); what must never be run raw on the host and why>
 - **Needs runtime**: <Docker / network / creds, if the gate needs them>
+- **Example lint**: <commands that validate executable examples in docs, e.g. `glab ci lint <file>`, `actionlint`, `shellcheck`, `terraform validate`; read by `relay-diff-reviewer`>
 
 ## Layers
 
@@ -41,6 +42,8 @@ Non-negotiable for the implementer.
 - <environment limits: no network at test time, pinned versions, lint gates on tests>
 
 ## Review priorities
+
+`relay-diff-reviewer` rates some findings `high` and blocking whatever this table says: doc claims the code contradicts, crashes on an omitted input, failing examples, ignored knobs, unmet acceptance criteria, credential over-reach, unguarded concurrent runs. Rows here can raise those, not lower them.
 
 | Finding | Severity |
 |---|---|
@@ -73,6 +76,7 @@ Only if the changed surface can be exercised at runtime (read by the `relay-veri
 
 - **Commit style**: <Conventional Commits? what the type drives (release bump)?>
 - **Base branch**: <main>
+- **Base sync**: <omit for `merge` (a branch behind the base merges it before review and before push); `rebase` for branches never pushed>
 - **PR/MR recipe**: <exact command; omit to use `gh pr create` / `glab mr create` with an API fallback>
 - **Attribution**: <omit for an `Assisted-by: omp:<model>` commit trailer and PR/MR footer; `pr-only` for the footer alone; `none` for neither; or the exact trailer the repo requires>
 - **Prose pass**: <omit for none; or a skill name (e.g. `humanizer`) to run commit/PR text through>

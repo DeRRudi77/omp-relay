@@ -8,7 +8,7 @@ Dispatch the **relay-verifier** agent to browser-verify the target in the `User:
 
 ## Steps
 
-1. **Resolve the target.** Empty → the current diff vs the default branch (`git diff <base>...HEAD` plus `git status`); pass a short summary of what changed (files, behaviour) and the diff stat, not the full diff. A flow description or a bug report → that, as the flow to drive. A worktree path → run from there.
+1. **Resolve the target.** Empty → the current change vs the default branch: `git diff $(git merge-base origin/<base> HEAD)` (committed and uncommitted edits) plus the untracked files `git ls-files --others --exclude-standard` lists; pass a short summary of what changed (files, behaviour) and the diff stat, not the full diff. A flow description or a bug report → that, as the flow to drive. A worktree path → run from there.
 2. **Check it can run at all.** Resolve `PROFILE` as in `skill://relay-feature/SKILL.md` ("Project guidance"). If neither a `## Verify` section nor `AGENTS.md` / `CLAUDE.md` says how to run the app locally, say so and stop; do not guess a command. If the change has no runtime surface (docs, CI config, a library with no UI or HTTP), say that and stop.
 3. **Dispatch** with `task` (`agent: relay-verifier`, `solutionSpace` like `flow known; defects open`), `context` = `PROFILE` verbatim, the change summary, and `WORKTREE_PATH` (this line verbatim: **"Work inside the worktree at `<WORKTREE_PATH>`. All file paths, `cwd` settings, and tool calls must target that directory, not the main checkout."**). Do not drive the browser yourself.
 4. **Relay the verdict** (works / broken / could-not-verify), the steps driven, and any defects as `symptom → repro → expected`. Do not soften a `could-not-verify` into a pass.

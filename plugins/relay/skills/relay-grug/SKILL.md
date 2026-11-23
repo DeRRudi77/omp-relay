@@ -8,7 +8,7 @@ Dispatch the **relay-grug** agent on the target in the `User:` text.
 
 ## Steps
 
-1. **Resolve the target.** Empty → current diff vs the default branch (`git diff <base>...HEAD` plus `git status`). A branch, worktree path, or file → that. Prose describing a design or plan → pass it through as-is; grug reviews designs, not only code. For a worktree, pass its absolute path and say every `cwd` must be there.
+1. **Resolve the target.** Empty → the current change vs the default branch: `git diff $(git merge-base origin/<base> HEAD)` (committed and uncommitted edits; `<base>...HEAD` alone misses uncommitted work) plus the untracked files `git ls-files --others --exclude-standard` lists. A branch, worktree path, or file → that. Prose describing a design or plan → pass it through as-is; grug reviews designs, not only code. For a worktree, pass its absolute path and say every `cwd` must be there.
 2. **Guidance.** Resolve `PROFILE` as in `skill://relay-feature/SKILL.md` ("Project guidance"): `.omp/relay.md` if present (its **Complexity hot spots** tell grug where demons hide), else `AGENTS.md` and/or `CLAUDE.md`. Pass it verbatim in `context`.
 3. **Dispatch** with `task` (`agent: relay-grug`, with a `solutionSpace` like `complexity demons open; no known cause`). Do not do the review inline.
 4. **Relay grug's findings verbatim**, in grug's voice, ending with the "grug club here" line. Do not translate to normal prose or soften it.

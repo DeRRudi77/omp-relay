@@ -21,7 +21,8 @@ Settings this skill reads:
 |---|---|
 | **Commit style** | Conventional Commits, as below |
 | **Base branch** | the remote default: `git symbolic-ref --short refs/remotes/origin/HEAD` |
-| **PR/MR recipe** | an exact command; replaces step 4 of Publish entirely |
+| **Base sync** | `merge`: a branch behind `origin/<base>` merges it before push (Publish step 2). `rebase` rebases instead, for branches never pushed |
+| **PR/MR recipe** | an exact command; replaces step 5 of Publish entirely |
 | **Attribution** | an `Assisted-by` commit trailer plus a PR/MR footer; `pr-only`, `none` or a repo-specified trailer change that, as in [Attribution](#attribution) |
 | **Prose pass** | none; if the setting names a skill (e.g. `humanizer`), run commit subjects/bodies and the PR/MR title/description through it after shortening, preserving syntax, issue references, commands, code blocks and facts |
 | **CI watch** | `on`: after opening the PR/MR, watch its pipeline and fix failures (Phase 3). `off` skips it |
@@ -95,16 +96,17 @@ It does not count toward the description budget, and the prose pass leaves it un
 Budget: ~200 words of prose. One short paragraph of why, then tight bullets. The description is not where you prove the work was thorough.
 
 1. Confirm the branch is not the base branch. If it is, stop.
-2. `git push -u origin <branch>`. If the user asked only to "commit" (and no calling skill passed approval), stop after Phase 1 and ask first.
-3. If the repo has a PR/MR template (`.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/`, `.gitlab/merge_request_templates/`), follow its sections exactly but fill them tersely; `N/A` is a complete answer.
-4. Open the request:
+2. If the user asked only to "commit" (and no calling skill passed approval), stop after Phase 1 and ask first. Otherwise check the branch contains the current base: `git fetch origin <base>`, then `git merge-base --is-ancestor origin/<base> HEAD`. If it does not, bring it current per the **Base sync** setting, run the gate, and only then push. A conflict you cannot resolve without guessing at intent: stop and report the files. CI and merge bots (Atlantis, merge trains) test the merged result, so a stale branch fails there instead of here.
+3. `git push -u origin <branch>`.
+4. If the repo has a PR/MR template (`.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/`, `.gitlab/merge_request_templates/`), follow its sections exactly but fill them tersely; `N/A` is a complete answer.
+5. Open the request:
    - **A configured PR/MR recipe replaces everything below.** Run it.
    - Otherwise pick the forge from `git remote get-url origin`: GitHub → `gh pr create`; GitLab → `glab mr create`; Gitea/Forgejo → a mounted Gitea MCP's create-pull-request, if any; anything else → the API tool the user has, or the "create pull request" URL that `git push` prints.
    - **If the CLI fails** (not installed, not authenticated, or `glab` rejecting the remote because `~/.ssh/config` rewrites the host), use the forge's API instead of fighting it: `gh api -X POST repos/<owner>/<repo>/pulls -f head=<branch> -f base=<base> -f title=... -f body=...`, or `glab api -X POST "projects/<url-encoded-path>/merge_requests" -f source_branch=<branch> -f target_branch=<base> -f title=... -f description=...` (`%2F` for each `/` in the path). Pass multi-line bodies through a heredoc into a variable. Tell the user which path you took.
-5. Title: the lead commit's subject, or one line spanning the commits. Description: the why, then a short bullet list. Include whatever the calling skill required.
-6. Link the ticket if there is one: a key in the branch name or commits, or one the caller passed. Fetch its title or URL only if you need it, using the tools the repo's `## Tracker` section names (`skill://relay-feature/references/tracker.md`). No ticket, no line; never invent a reference.
-7. End the description with the attribution footer, when the setting calls for one ([Attribution](#attribution)).
-8. Report the PR/MR URL, then go to Phase 3. Mention the pipeline only if it is the first run of a new job or expected to fail.
+6. Title: the lead commit's subject, or one line spanning the commits. Description: the why, then a short bullet list. Include whatever the calling skill required.
+7. Link the ticket if there is one: a key in the branch name or commits, or one the caller passed. Fetch its title or URL only if you need it, using the tools the repo's `## Tracker` section names (`skill://relay-feature/references/tracker.md`). No ticket, no line; never invent a reference.
+8. End the description with the attribution footer, when the setting calls for one ([Attribution](#attribution)).
+9. Report the PR/MR URL, then go to Phase 3. Mention the pipeline only if it is the first run of a new job or expected to fail.
 
 ## Phase 3: Watch the pipeline
 

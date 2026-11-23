@@ -4,10 +4,10 @@ Repo-agnostic change pipelines for omp. An orchestrator skill dispatches special
 
 | Skill | What it does |
 |---|---|
-| `/relay-feature` | investigate → implement → complexity check → test → browser verify (when runnable) → review → docs-sync → commit and PR/MR |
+| `/relay-feature` | investigate → implement → complexity check → test → browser verify (when runnable) → docs-sync → merge the base branch → two-lens review (threat; consumer/docs) → fix or record every finding, re-reviewing each rework → commit and PR/MR |
 | `/relay-bug` | like `/relay-feature`, but a failing repro test must exist (red) before any fix is written |
 | `/relay-implement` | implement an approved plan in a worktree, no test/review/docs pipeline |
-| `/relay-review` | read-only review of a diff, branch, worktree, file, or PR/MR; findings are Conventional Comments, placed inline on a PR/MR |
+| `/relay-review` | read-only review of a diff, branch, worktree, file, or PR/MR by two parallel reviewers (threat; consumer/docs); findings are Conventional Comments, placed inline on a PR/MR |
 | `/relay-grug` | complexity review |
 | `/relay-verify` | drive a change in a real browser (omp's own isolated one) to confirm it renders, behaves, has no new console errors, and respects isolation boundaries |
 | `/relay-init` | create or refresh a repo's `.omp/relay.md` profile |
@@ -58,7 +58,7 @@ Sections: Gate, Layers, Hard rules, Test conventions, Review priorities, Complex
 
 Ticket trackers are not built in. A `## Tracker` section tells the skills how to detect, fetch and update tickets with whatever MCP tools you have mounted; see [tracker.md](plugins/relay/skills/relay-feature/references/tracker.md).
 
-Delivery settings (`## Delivery`): commit style, base branch, an exact PR/MR recipe, attribution (`Assisted-by: omp:<model>` commit trailer and PR/MR footer by default; `pr-only` or `none` to cut back), an optional prose-pass skill, and CI watch (on by default). `/relay-commit` reads them; see its `Settings` table for defaults.
+Delivery settings (`## Delivery`): commit style, base branch, base sync (`merge` by default, or `rebase`), an exact PR/MR recipe, attribution (`Assisted-by: omp:<model>` commit trailer and PR/MR footer by default; `pr-only` or `none` to cut back), an optional prose-pass skill, and CI watch (on by default). `/relay-commit` reads them; see its `Settings` table for defaults.
 
 ## Updating
 
