@@ -28,24 +28,24 @@ Run `/reload-plugins` in a running session.
 
 ## Requirements
 
-- **Model roles.** Each agent names a role, and your `config.yml` maps the role to a model. Four tiers; define all four:
-
-  | Role | Used by | Suggested |
-  |---|---|---|
-  | `relay_light` | `relay-docs-sync` | small, cheap model |
-  | `relay_fast` | `relay-investigator`, `relay-grug` | mid model, medium thinking |
-  | `relay_build` | `relay-implementer`, `relay-test-writer`, `relay-verifier` | mid model, high thinking |
-  | `relay_deep` | `relay-diff-reviewer`, `relay-bug-reproducer` | strongest model, high thinking |
+- **Models (optional).** Every agent resolves its model from its own role, `relay_<agent>` (dashes become underscores), then from the shared `relay_default` role. If neither is set, the agent uses omp's normal task-agent model. Configure nothing, one default, or any subset of agents:
 
   ```yaml
   modelRoles:
-    relay_light: <provider/model[:thinking]>
-    relay_fast: <provider/model[:thinking]>
-    relay_build: <provider/model[:thinking]>
-    relay_deep: <provider/model[:thinking]>
+    relay_default: <provider/model[:thinking]>       # used by every relay agent not listed below
+    relay_investigator: <provider/model[:thinking]>
+    relay_grug: <provider/model[:thinking]>
+    relay_implementer: <provider/model[:thinking]>
+    relay_test_writer: <provider/model[:thinking]>
+    relay_verifier: <provider/model[:thinking]>
+    relay_diff_reviewer: <provider/model[:thinking]>
+    relay_bug_reproducer: <provider/model[:thinking]>
+    relay_docs_sync: <provider/model[:thinking]>
   ```
 
-  Override a single agent without editing the plugin with `task.agentModelOverrides.<agent-name>`.
+  Resolution order per agent: `task.agentModelOverrides.<agent-name>` → `relay_<agent>` → `relay_default` → omp's task-agent fallback. Leave a role out to inherit the default.
+
+  Upgrading from 0.6: the tier roles `relay_light`, `relay_fast`, `relay_build` and `relay_deep` are no longer read. Rename them to per-agent roles or collapse them into `relay_default`.
 
 - `git`. `wtp` is used for worktrees when the repo has a `.wtp.yml`; otherwise plain `git worktree`.
 - `gh` or `glab` for opening the PR/MR, unless the repo's profile gives its own recipe. If the CLI is missing or fails, `/relay-commit` falls back to the forge's API through the same tool.

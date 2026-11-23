@@ -8,7 +8,7 @@
 		{
 			"name": "relay",
 			"description": "/relay-feature and /relay-bug lifecycle orchestrators (investigate, implement, complexity check, test, browser verify, review, docs-sync, PR/MR) with specialist subagents, plus /relay-verify, /relay-commit, /relay-implement, /relay-review, /relay-grug and /relay-init",
-			"version": "0.6.0",
+			"version": "0.7.0",
 			"category": "development",
 			"source": "./plugins/relay",
 			"keywords": ["workflow", "worktree", "tdd", "review"],

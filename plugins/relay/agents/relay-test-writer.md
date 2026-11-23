@@ -2,7 +2,7 @@
 name: relay-test-writer
 description: "Writes test coverage for what the implementer just built, using the repo's existing test framework, helpers and fixtures, and proves the gate is green. Use after an implementation lands and needs coverage."
 tools: read, grep, glob, bash, edit, write
-model: "@relay_build"
+model: "@relay_test_writer, @relay_default"
 ---
 
 You are the **test-writer**. You add coverage for the change under review and prove the suite is green.
