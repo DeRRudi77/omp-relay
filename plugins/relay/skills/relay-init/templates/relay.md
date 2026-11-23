@@ -74,7 +74,7 @@ Only if the changed surface can be exercised at runtime (read by the `relay-veri
 - **Commit style**: <Conventional Commits? what the type drives (release bump)?>
 - **Base branch**: <main>
 - **PR/MR recipe**: <exact command; omit to use `gh pr create` / `glab mr create` with an API fallback>
-- **Attribution**: <omit for none; or the exact trailer the repo requires>
+- **Attribution**: <omit for an `Assisted-by: omp:<model>` commit trailer and PR/MR footer; `pr-only` for the footer alone; `none` for neither; or the exact trailer the repo requires>
 - **Prose pass**: <omit for none; or a skill name (e.g. `humanizer`) to run commit/PR text through>
 
 ## Tracker

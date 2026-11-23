@@ -22,7 +22,7 @@ Settings this skill reads:
 | **Commit style** | Conventional Commits, as below |
 | **Base branch** | the remote default: `git symbolic-ref --short refs/remotes/origin/HEAD` |
 | **PR/MR recipe** | an exact command; replaces step 4 of Publish entirely |
-| **Attribution** | none: no `Co-Authored-By`, no "generated with" line, unless the repo specifies a trailer (then use it verbatim) |
+| **Attribution** | an `Assisted-by` commit trailer plus a PR/MR footer; `pr-only`, `none` or a repo-specified trailer change that, as in [Attribution](#attribution) |
 | **Prose pass** | none; if the setting names a skill (e.g. `humanizer`), run commit subjects/bodies and the PR/MR title/description through it after shortening, preserving syntax, issue references, commands, code blocks and facts |
 | **CI watch** | `on`: after opening the PR/MR, watch its pipeline and fix failures (Phase 3). `off` skips it |
 
@@ -61,8 +61,34 @@ Steps:
 2. Split into logical commits when the diff spans unrelated concerns. Never `git add -A` blindly.
 3. **Never** stage secrets or local env files (`.env`, credentials, tokens, key material). Flag any that are untracked and unignored.
 4. If on the base branch, branch first: `type/short-description`, or the tracker's suggested branch name for a linked ticket. If already on a topic branch (e.g. a pipeline worktree branch), stay on it.
-5. Commit. Hooks (formatters, linters) may rewrite and restage files: re-check `git status` afterwards.
+5. Commit, adding the attribution trailer, if any, with `git commit --trailer "Assisted-by: ..."`. Hooks (formatters, linters) may rewrite and restage files: re-check `git status` afterwards.
 6. Report the SHA(s).
+
+### Attribution
+
+Attribution follows the [kernel-style](https://www.kernel.org/doc/html/latest/process/coding-assistants.html) `Assisted-by: omp:<model>` form. The setting picks where it goes:
+
+| Setting | Commit trailer | PR/MR footer |
+|---|---|---|
+| omitted (default) | `Assisted-by: omp:<model>`, one line per model | yes |
+| `pr-only` | none | yes |
+| `none` | none | none |
+| a trailer the repo specifies | that trailer, verbatim | only if it is an `Assisted-by` trailer, with its value |
+
+List each distinct model that wrote part of the change; a commit's trailers cover that commit, the footer covers the whole branch:
+
+- Files edited by a relay agent (`relay-implementer`, `relay-test-writer`, `relay-bug-reproducer`, `relay-docs-sync`): that agent's model. Read `omp config get modelRoles --json` and take `relay_<agent>` (hyphens to underscores), else `relay_default`.
+- Files you edited yourself: the model you are running as.
+- `<model>` is the bare model id: drop the provider (`amazon-bedrock/`), any region/vendor prefix (`us.anthropic.`) and the thinking suffix (`:high`). `amazon-bedrock/us.anthropic.claude-opus-5-5:high` → `claude-opus-5-5`.
+- Model not resolvable: `omp` alone. Never guess a model name.
+
+The footer is the description's own last paragraph, one line:
+
+```
+Assisted-by: omp:claude-opus-5-5, omp:gpt-6-luna
+```
+
+It does not count toward the description budget, and the prose pass leaves it untouched. No `Co-Authored-By` and no "Generated with" line anywhere.
 
 ## Phase 2: Publish
 
@@ -77,7 +103,8 @@ Budget: ~200 words of prose. One short paragraph of why, then tight bullets. The
    - **If the CLI fails** (not installed, not authenticated, or `glab` rejecting the remote because `~/.ssh/config` rewrites the host), use the forge's API instead of fighting it: `gh api -X POST repos/<owner>/<repo>/pulls -f head=<branch> -f base=<base> -f title=... -f body=...`, or `glab api -X POST "projects/<url-encoded-path>/merge_requests" -f source_branch=<branch> -f target_branch=<base> -f title=... -f description=...` (`%2F` for each `/` in the path). Pass multi-line bodies through a heredoc into a variable. Tell the user which path you took.
 5. Title: the lead commit's subject, or one line spanning the commits. Description: the why, then a short bullet list. Include whatever the calling skill required.
 6. Link the ticket if there is one: a key in the branch name or commits, or one the caller passed. Fetch its title or URL only if you need it, using the tools the repo's `## Tracker` section names (`skill://relay-feature/references/tracker.md`). No ticket, no line; never invent a reference.
-7. Report the PR/MR URL, then go to Phase 3. Mention the pipeline only if it is the first run of a new job or expected to fail.
+7. End the description with the attribution footer, when the setting calls for one ([Attribution](#attribution)).
+8. Report the PR/MR URL, then go to Phase 3. Mention the pipeline only if it is the first run of a new job or expected to fail.
 
 ## Phase 3: Watch the pipeline
 
@@ -107,3 +134,4 @@ Run long waits as a background job or with a generous timeout; do not stop on th
 - Anything you turn up along the way (a bug, a scope question, a decision for the user) goes in chat, not into the description. That pressure is what inflates descriptions.
 - Match the base branch the repo actually uses; do not assume `main`.
 - Never force-push, and never push to the base branch.
+- Never add `Signed-off-by`: only a human can certify the DCO.

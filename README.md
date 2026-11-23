@@ -58,7 +58,7 @@ Sections: Gate, Layers, Hard rules, Test conventions, Review priorities, Complex
 
 Ticket trackers are not built in. A `## Tracker` section tells the skills how to detect, fetch and update tickets with whatever MCP tools you have mounted; see [tracker.md](plugins/relay/skills/relay-feature/references/tracker.md).
 
-Delivery settings (`## Delivery`): commit style, base branch, an exact PR/MR recipe, attribution trailer, an optional prose-pass skill, and CI watch (on by default). `/relay-commit` reads them; see its `Settings` table for defaults.
+Delivery settings (`## Delivery`): commit style, base branch, an exact PR/MR recipe, attribution (`Assisted-by: omp:<model>` commit trailer and PR/MR footer by default; `pr-only` or `none` to cut back), an optional prose-pass skill, and CI watch (on by default). `/relay-commit` reads them; see its `Settings` table for defaults.
 
 ## Updating
 
