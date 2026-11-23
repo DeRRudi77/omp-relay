@@ -11,7 +11,7 @@ Repo-agnostic change pipelines for omp. An orchestrator skill dispatches special
 | `/relay-grug` | complexity review |
 | `/relay-verify` | drive a change in a real browser (omp's own isolated one) to confirm it renders, behaves, has no new console errors, and respects isolation boundaries |
 | `/relay-init` | create or refresh a repo's `.omp/relay.md` profile |
-| `/relay-commit` | commit (short Conventional Commits), push, open a PR (GitHub) or MR (GitLab, others) with a CLI-to-API fallback; then watches the pipeline and fixes failures itself; also what `/relay-feature` and `/relay-bug` end with |
+| `/relay-commit` | commit (short Conventional Commits), push, open a PR (GitHub) or MR (GitLab, others) with a CLI-to-API fallback; then watches the pipeline and fixes failures itself; optionally posts a review request to Slack; also what `/relay-feature` and `/relay-bug` end with |
 
 Agents: `relay-investigator`, `relay-bug-reproducer`, `relay-implementer`, `relay-test-writer`, `relay-verifier`, `relay-diff-reviewer`, `relay-docs-sync`, `relay-grug`.
 
@@ -58,7 +58,7 @@ Sections: Gate, Layers, Hard rules, Test conventions, Review priorities, Complex
 
 Ticket trackers are not built in. A `## Tracker` section tells the skills how to detect, fetch and update tickets with whatever MCP tools you have mounted; see [tracker.md](plugins/relay/skills/relay-feature/references/tracker.md).
 
-Delivery settings (`## Delivery`): commit style, base branch, base sync (`merge` by default, or `rebase`), an exact PR/MR recipe, attribution (`Assisted-by: omp:<model>` commit trailer and PR/MR footer by default; `pr-only` or `none` to cut back), an optional prose-pass skill, and CI watch (on by default). `/relay-commit` reads them; see its `Settings` table for defaults.
+Delivery settings (`## Delivery`): commit style, base branch, base sync (`merge` by default, or `rebase`), an exact PR/MR recipe, attribution (`Assisted-by: omp:<model>` commit trailer and PR/MR footer by default; `pr-only` or `none` to cut back), an optional prose-pass skill, CI watch (on by default), and a Slack review request (off by default; name a channel to post the PR/MR link with a short description once the pipeline is green, through a mounted Slack MCP). `/relay-commit` reads them; see its `Settings` table for defaults.
 
 ## Updating
 

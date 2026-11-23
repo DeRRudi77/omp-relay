@@ -1,10 +1,10 @@
 ---
 name: relay-commit
-description: "Commit the current work as short Conventional Commits, push a topic branch, and open a pull request (GitHub) or merge request (GitLab, Gitea, Bitbucket, ...) on whatever forge the repo uses. Replaces forge-specific commit-and-pr / commit-and-mr skills. Use for /relay-commit, commit and PR, commit and MR, open a PR/MR, or ship this. Reads the repo's Delivery settings from .omp/relay.md or AGENTS.md / CLAUDE.md. Keeps commit messages and descriptions short."
+description: "Commit the current work as short Conventional Commits, push a topic branch, and open a pull request (GitHub) or merge request (GitLab, Gitea, Bitbucket, ...) on whatever forge the repo uses, then watch its pipeline and, when the repo enables it, post a review request to Slack. Replaces forge-specific commit-and-pr / commit-and-mr skills. Use for /relay-commit, commit and PR, commit and MR, open a PR/MR, or ship this. Reads the repo's Delivery settings from .omp/relay.md or AGENTS.md / CLAUDE.md. Keeps commit messages and descriptions short."
 argument-hint: "<optional: notes for the description, or a ticket key>"
 ---
 
-Two phases: **commit**, then **publish**. Both are governed by one rule, and both take their settings from the repo.
+Phases: **commit**, **publish**, **watch the pipeline**, and, when the repo turns it on, **request review** in Slack. All are governed by one rule, and all take their settings from the repo.
 
 ## Settings
 
@@ -26,6 +26,7 @@ Settings this skill reads:
 | **Attribution** | an `Assisted-by` commit trailer plus a PR/MR footer; `pr-only`, `none` or a repo-specified trailer change that, as in [Attribution](#attribution) |
 | **Prose pass** | none; if the setting names a skill (e.g. `humanizer`), run commit subjects/bodies and the PR/MR title/description through it after shortening, preserving syntax, issue references, commands, code blocks and facts |
 | **CI watch** | `on`: after opening the PR/MR, watch its pipeline and fix failures (Phase 3). `off` skips it |
+| **Review request** | `off`. A Slack channel turns it on: after publishing, post a review request there (Phase 4). Optional `cc:`, `format:` and `sign-off:` parts, as in [Phase 4](#phase-4-request-review) |
 
 When another skill (`relay-feature`, `relay-bug`) calls this one, it may also pass the commit type to use, content the description must include, and that the user already approved pushing.
 
@@ -129,11 +130,45 @@ Run long waits as a background job or with a generous timeout; do not stop on th
    - **Unrelated or pre-existing** (fails the same way on the base branch, or touches code the diff does not): do not fix it inside this change. Report it in chat with the job name and the evidence.
 3. Watch the new pipeline and repeat.
 
-**Stop conditions:** pipeline green; three fix attempts on the same job without progress; a failure that needs a user decision (credentials, product behaviour, scope); or an unrelated failure. Then report in chat: PR/MR URL, which job failed, the cause, what you tried. Green: one line, nothing more.
+**Stop conditions:** pipeline green; three fix attempts on the same job without progress; a failure that needs a user decision (credentials, product behaviour, scope); or an unrelated failure. Then report in chat: PR/MR URL, which job failed, the cause, what you tried. Green: one line, then Phase 4.
+
+## Phase 4: Request review
+
+Only when the **Review request** setting names a channel; it is off by default. Post once, when this run opened the PR/MR: a run that pushed to an existing one does not post again. Post after Phase 3 ends green, or right after opening when Phase 3 was skipped. A red pipeline means no post; say so in chat, since reviewers should not be asked to look at a failing change.
+
+The setting is the channel, then optional parts separated by `;`:
+
+```
+- **Review request**: https://<workspace>.slack.com/archives/C0123456789; cc: <@U0123ABCD> <!subteam^S0123ABCD>; sign-off: :zap: :coffee: :pray:
+```
+
+- **Channel**: an archive URL (the ID is the segment after `/archives/`), a channel ID, or `#name` (look it up with the Slack MCP's channel search).
+- **cc** (optional): Slack mentions, `<@U…>` for people and `<!subteam^S…>` for groups. Resolve a plain name with the Slack MCP's user search; leave out any you cannot match to exactly one person, and say so in chat.
+- **format** (optional): the first line, with `{url}` for the PR/MR URL and `{sign-off}` for the sign-off emoji. Default `:request-review: {url} {sign-off}`. `:request-review:` is a custom emoji, so a workspace without it needs its own format.
+- **sign-off** (optional): the emoji to pick from, space-separated, or `none`. Default: `:please-minion: :yes-please: :thankyoubow: :thankyou-rainbow: :keanu-thanks: :pikachu-thanks: :catcoding: :bongocat_code: :cat-on-keyboard: :coffee: :zap:`. Most of these are custom emoji too. Pick one per post, by the change, from those in the list:
+  - `:zap:` a small change (roughly 30 changed lines or fewer); `:cat-on-keyboard:` when that small change is a fix, typo or cleanup.
+  - `:coffee:` a large one (roughly 400+ changed lines, or one that needs a sitting to review).
+  - `:catcoding:` / `:bongocat_code:` mostly code, between those sizes.
+  - Otherwise any of the please/thank-you ones, varying between posts.
+  - A custom list without these names: pick any one, varying between posts.
+
+The message:
+
+```
+:request-review: https://gitlab.example.com/group/project/-/merge_requests/216 :catcoding:
+Moves review snapshots to the metrics bucket so every development agent shows on the quality page. Config and IAM only.
+cc: <@U0123ABCD> <!subteam^S0123ABCD>
+```
+
+1. Line 1: the format, with the URL and sign-off filled in. With `sign-off: none`, drop `{sign-off}` and the space before it.
+2. Line 2, always: a short description of the change, written for someone deciding whether to open the link. One to three sentences, at most ~60 words: what changes and why, plus a merge-order dependency or deploy step if there is one. Write it from the PR/MR's why paragraph, not as a copy of the description. Slack mrkdwn, not Markdown: no headings, no tables; backticks are fine. No open review findings, no attribution footer. Run it through the **Prose pass** skill when one is set.
+3. Line 3, only when `cc` is set: `cc: ` and the mentions.
+4. Send it with the mounted Slack MCP's send-message tool, using the channel ID. There is no Slack MCP or the send fails: do not try another route. Put the message in chat for the user to post.
+5. Report the message permalink in one line.
 
 ## Guardrails
 
-- Anything you turn up along the way (a bug, a scope question, a decision for the user) goes in chat, not into the description. That pressure is what inflates descriptions.
+- Anything you turn up along the way (a bug, a scope question, a decision for the user) goes in chat, not into the description or the Slack message. That pressure is what inflates descriptions.
 - Match the base branch the repo actually uses; do not assume `main`.
 - Never force-push, and never push to the base branch.
 - Never add `Signed-off-by`: only a human can certify the DCO.

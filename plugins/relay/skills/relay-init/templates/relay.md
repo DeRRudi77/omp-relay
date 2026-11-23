@@ -80,6 +80,8 @@ Only if the changed surface can be exercised at runtime (read by the `relay-veri
 - **PR/MR recipe**: <exact command; omit to use `gh pr create` / `glab mr create` with an API fallback>
 - **Attribution**: <omit for an `Assisted-by: omp:<model>` commit trailer and PR/MR footer; `pr-only` for the footer alone; `none` for neither; or the exact trailer the repo requires>
 - **Prose pass**: <omit for none; or a skill name (e.g. `humanizer`) to run commit/PR text through>
+- **CI watch**: <omit for `on` (watch the PR/MR pipeline and fix failures); `off` to skip>
+- **Review request**: <omit for `off`; or a Slack channel (archive URL, ID or `#name`) to post a review request in once the pipeline is green, optionally `; cc: <@U…>`, `; format: <first line with {url} and {sign-off}>` and `; sign-off: <emoji to pick from, or none>`>
 
 ## Tracker
 
