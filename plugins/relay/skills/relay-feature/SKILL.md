@@ -22,7 +22,7 @@ Prefix `PROFILE` with a one-line `Source: <path(s)>` so agents know whether the 
 
 ## Orchestration contract
 
-- Phases run **in order**, with `agent` set explicitly: `relay-investigator` → `relay-implementer` → `relay-grug` → `relay-test-writer` → (`relay-verifier`, conditional) → `relay-docs-sync` → base sync (you) → `relay-diff-reviewer` ×2 → delta re-reviews until resolved. One `task` call per phase; the review is one call with two `tasks[]` items. Each consumes the previous phase's output. Dispatch, then wait for the result; never poll.
+- Phases run **in order**, with `agent` set explicitly: `relay-investigator` → `relay-implementer` → `relay-grug` → `relay-test-writer` → (`relay-verifier`, conditional) → `relay-docs-sync` → base sync (you) → `relay-threat-reviewer` + `relay-consumer-reviewer` → delta re-reviews until resolved. One `task` call per phase; each review round is one call with two `tasks[]` items, one per reviewer. Each consumes the previous phase's output. Dispatch, then wait for the result; never poll.
 - Every `task` item carries: a self-contained `task`, a `solutionSpace` (how open-ended the child's problem is), and a shared `context` containing `PROFILE` verbatim, the previous phase's output, and (once the worktree exists) this line verbatim:
 
   **"Work inside the worktree at `<WORKTREE_PATH>`. All file paths, `cwd` settings, and tool calls must target that directory, not the main checkout."**
@@ -62,8 +62,8 @@ Update docs the change made inaccurate, per the profile's **Docs map**. This run
 ### 9. Sync with the base branch
 Run "Sync with the base branch" from `skill://relay-feature/references/worktree.md` yourself. Conflicts go to `relay-implementer` as described there, then the gate. Report `base unchanged` or `merged N commits from origin/<base>`, and any conflicts resolved. Then take a snapshot (same file, "Snapshot") and record its id as `REVIEWED`.
 
-### 10. Review: `relay-diff-reviewer`, two lenses in parallel
-Dispatch two `relay-diff-reviewer` items in one `tasks[]` batch: lens **`threat`** (credential reach, secret exposure, concurrency and ordering, omitted inputs) and lens **`consumer`** (every prose claim against the code, every knob traced to its consumers, every executable example linted). Both get the same `context`:
+### 10. Review: `relay-threat-reviewer` and `relay-consumer-reviewer` in parallel
+Dispatch both in one `tasks[]` batch: **`relay-threat-reviewer`** (credential reach, secret exposure, concurrency and ordering, omitted inputs) and **`relay-consumer-reviewer`** (every prose claim against the code, every knob traced to its consumers, every executable example linted). Each has its own model role, so the two lenses can run on different models. Both get the same `context`:
 - `PROFILE`, whose **Review priorities** apply;
 - the approved plan, and the ticket's acceptance criteria verbatim (its "Done when" section or equivalent), if the input was a ticket;
 - the text of the ADRs and design docs from step 3;
@@ -79,7 +79,7 @@ Every finding labelled `issue`, and every `(blocking)` finding whatever its labe
 
 A `question` you cannot answer from the code goes to the user. A `todo` for docs goes to `relay-docs-sync`. A `suggestion` or `nitpick` is your call; name the ones you skip in the phase summary.
 
-After rework, re-run step 6 if the implementation changed, step 7 if runtime behaviour changed and the step applies, and step 8 on the rework. Then take a fresh snapshot, `CURRENT`, and run a **delta re-review**: one `relay-diff-reviewer` task, no lens (it applies both), with `context` carrying `PROFILE`, the step 10 inputs, the tree ids `REVIEWED` and `CURRENT`, the findings being addressed verbatim, and how each was resolved. It reviews only `git diff REVIEWED CURRENT`, says whether each finding is closed, and reports what the rework broke. Its findings go through this step again; then `CURRENT` becomes `REVIEWED`.
+After rework, re-run step 6 if the implementation changed, step 7 if runtime behaviour changed and the step applies, and step 8 on the rework. Then take a fresh snapshot, `CURRENT`, and run a **delta re-review**: both reviewers again in one batch, `context` carrying `PROFILE`, the step 10 inputs, the tree ids `REVIEWED` and `CURRENT`, and how each finding was resolved; each reviewer's `task` carries the findings its lens raised, verbatim. Each reviews only `git diff REVIEWED CURRENT`, says whether each of its findings is closed, and reports what the rework broke. Their findings go through this step again; then `CURRENT` becomes `REVIEWED`.
 
 Nothing reaches step 12 unreviewed: any worktree change after the last review (rework, docs-sync, a conflict resolution) gets a delta re-review. After three delta rounds without convergence, stop and show the user the open findings.
 

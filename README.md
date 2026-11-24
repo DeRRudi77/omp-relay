@@ -13,7 +13,7 @@ Repo-agnostic change pipelines for omp. An orchestrator skill dispatches special
 | `/relay-init` | create or refresh a repo's `.omp/relay.md` profile |
 | `/relay-commit` | commit (short Conventional Commits), push, open a PR (GitHub) or MR (GitLab, others) with a CLI-to-API fallback; then watches the pipeline and fixes failures itself; optionally posts a review request to Slack; also what `/relay-feature` and `/relay-bug` end with |
 
-Agents: `relay-investigator`, `relay-bug-reproducer`, `relay-implementer`, `relay-test-writer`, `relay-verifier`, `relay-diff-reviewer`, `relay-docs-sync`, `relay-grug`.
+Agents: `relay-investigator`, `relay-bug-reproducer`, `relay-implementer`, `relay-test-writer`, `relay-verifier`, `relay-threat-reviewer`, `relay-consumer-reviewer`, `relay-docs-sync`, `relay-grug`.
 
 Every skill and agent is prefixed `relay-`. omp does not namespace agents, and it gives a clashing skill name to whichever source ranks higher, which would break the skills' links to each other (`skill://relay-feature/references/...`). Invoke a skill as `/skill:relay-bug`.
 
@@ -38,14 +38,20 @@ Run `/reload-plugins` in a running session.
     relay_implementer: <provider/model[:thinking]>
     relay_test_writer: <provider/model[:thinking]>
     relay_verifier: <provider/model[:thinking]>
-    relay_diff_reviewer: <provider/model[:thinking]>
+    relay_diff_reviewer: <provider/model[:thinking]>      # shared by both reviewers below
+    relay_threat_reviewer: <provider/model[:thinking]>
+    relay_consumer_reviewer: <provider/model[:thinking]>
     relay_bug_reproducer: <provider/model[:thinking]>
     relay_docs_sync: <provider/model[:thinking]>
   ```
 
-  Resolution order per agent: `task.agentModelOverrides.<agent-name>` → `relay_<agent>` → `relay_default` → omp's task-agent fallback. Leave a role out to inherit the default.
+  Resolution order per agent: `task.agentModelOverrides.<agent-name>` → `relay_<agent>` → `relay_default` → omp's task-agent fallback. The two reviewers check `relay_diff_reviewer` between their own role and `relay_default`, so one entry covers both lenses and a per-lens entry splits them. Leave a role out to inherit the default.
+
+  Mixing model families tends to catch more: when a Claude model implements, put the reviewers (and the test-writer, grug and bug-reproducer, which check its work) on an OpenAI model, or the other way round.
 
   Upgrading from 0.6: the tier roles `relay_light`, `relay_fast`, `relay_build` and `relay_deep` are no longer read. Rename them to per-agent roles or collapse them into `relay_default`.
+
+  Upgrading from 0.10: `relay-diff-reviewer` is split into `relay-threat-reviewer` and `relay-consumer-reviewer`. An existing `relay_diff_reviewer` role still applies to both; a `task.agentModelOverrides.relay-diff-reviewer` entry must be renamed.
 
 - `git`. `wtp` is used for worktrees when the repo has a `.wtp.yml`; otherwise plain `git worktree`.
 - `gh` or `glab` for opening the PR/MR, unless the repo's profile gives its own recipe. If the CLI is missing or fails, `/relay-commit` falls back to the forge's API through the same tool.

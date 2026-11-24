@@ -2,7 +2,7 @@
 
 <!--
 Read by the relay-feature / relay-bug / relay-implement / relay-review / relay-grug skills and their agents
-(relay-investigator, relay-bug-reproducer, relay-implementer, relay-test-writer, relay-diff-reviewer, relay-docs-sync, relay-grug).
+(relay-investigator, relay-bug-reproducer, relay-implementer, relay-test-writer, relay-threat-reviewer, relay-consumer-reviewer, relay-docs-sync, relay-grug).
 Facts only; verified against the repo. Delete sections that do not apply.
 Agents treat this file as outranking their generic defaults.
 -->
@@ -17,7 +17,7 @@ Agents treat this file as outranking their generic defaults.
 - **Narrow test**: `<command to run one test file / filter>`
 - **Toolchain rules**: <how tools are run (wrappers, containers); what must never be run raw on the host and why>
 - **Needs runtime**: <Docker / network / creds, if the gate needs them>
-- **Example lint**: <commands that validate executable examples in docs, e.g. `glab ci lint <file>`, `actionlint`, `shellcheck`, `terraform validate`; read by `relay-diff-reviewer`>
+- **Example lint**: <commands that validate executable examples in docs, e.g. `glab ci lint <file>`, `actionlint`, `shellcheck`, `terraform validate`; read by `relay-consumer-reviewer`>
 
 ## Layers
 
@@ -43,7 +43,7 @@ Non-negotiable for the implementer.
 
 ## Review priorities
 
-`relay-diff-reviewer` rates some findings `high` and blocking whatever this table says: doc claims the code contradicts, crashes on an omitted input, failing examples, ignored knobs, unmet acceptance criteria, credential over-reach, unguarded concurrent runs. Rows here can raise those, not lower them.
+`relay-threat-reviewer` and `relay-consumer-reviewer` rate some findings `high` and blocking whatever this table says: doc claims the code contradicts, crashes on an omitted input, failing examples, ignored knobs, unmet acceptance criteria, credential over-reach, unguarded concurrent runs. Rows here can raise those, not lower them.
 
 | Finding | Severity |
 |---|---|

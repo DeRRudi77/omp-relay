@@ -18,7 +18,7 @@ Resolve `PROFILE` exactly as `skill://relay-feature` does (read its "Project gui
 
 ## Orchestration contract
 
-- Phases run **in order**, with `agent` set explicitly: `relay-investigator` → `relay-bug-reproducer` → `relay-implementer` → `relay-test-writer` → (`relay-verifier`, conditional) → `relay-docs-sync` → base sync (you) → `relay-diff-reviewer` ×2 → delta re-reviews until resolved. One `task` call per phase; the review is one call with two `tasks[]` items. Each consumes the previous phase's output. Dispatch, then wait for the result; never poll. Never substitute the bundled `scout` / `task` / `reviewer` for a named agent.
+- Phases run **in order**, with `agent` set explicitly: `relay-investigator` → `relay-bug-reproducer` → `relay-implementer` → `relay-test-writer` → (`relay-verifier`, conditional) → `relay-docs-sync` → base sync (you) → `relay-threat-reviewer` + `relay-consumer-reviewer` → delta re-reviews until resolved. One `task` call per phase; each review round is one call with two `tasks[]` items, one per reviewer. Each consumes the previous phase's output. Dispatch, then wait for the result; never poll. Never substitute the bundled `scout` / `task` / `reviewer` for a named agent.
 - Every `task` item carries: a self-contained `task`, a `solutionSpace`, and a shared `context` containing `PROFILE` verbatim, the previous phase's output, and (once the worktree exists) this line verbatim:
 
   **"Work inside the worktree at `<WORKTREE_PATH>`. All file paths, `cwd` settings, and tool calls must target that directory, not the main checkout."**
@@ -73,8 +73,8 @@ Update docs the fix made inaccurate, per the profile's **Docs map**, including a
 ### 9. Sync with the base branch
 As step 9 of `skill://relay-feature`: merge `origin/<base>` per its worktree reference, route conflicts to `relay-implementer`, then record the snapshot id as `REVIEWED`.
 
-### 10. Review: `relay-diff-reviewer`, two lenses in parallel
-As step 10 of `skill://relay-feature` (lenses `threat` and `consumer`, same context for both). Add to both tasks: judge whether the fix addresses the root cause or only masks the symptom, and whether the repro test would have caught the original bug. The expected-vs-actual statement and root cause go in `context` alongside the plan.
+### 10. Review: `relay-threat-reviewer` and `relay-consumer-reviewer` in parallel
+As step 10 of `skill://relay-feature` (both reviewers, same context for both). Add to both tasks: judge whether the fix addresses the root cause or only masks the symptom, and whether the repro test would have caught the original bug. The expected-vs-actual statement and root cause go in `context` alongside the plan.
 
 ### 11. Resolve findings
 As step 11 of `skill://relay-feature`: every `issue` and every blocking finding is fixed, deferred with a reason, or the user's call; rework tasks carry the constraints from this skill's "Rework goes to the implementer"; after rework re-run 6, 7 (if it applies) and 8, then a delta re-review. Nothing reaches step 12 unreviewed; after three delta rounds without convergence, stop and show the user the open findings.

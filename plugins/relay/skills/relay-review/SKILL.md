@@ -1,10 +1,10 @@
 ---
 name: relay-review
-description: "Review a diff, branch, worktree, file, or a GitHub PR / GitLab MR with two parallel relay-diff-reviewer lenses in any repo: threat (credential reach, secret exposure, concurrency, omitted inputs) and consumer (doc claims against code, knob tracing, linted examples, blast radius, drift). Severity-ranked, written as Conventional Comments; on a PR/MR the comments are placed inline on the diff. Use for /relay-review, review this diff, or review this MR/PR (URL or number)."
+description: "Review a diff, branch, worktree, file, or a GitHub PR / GitLab MR with two parallel reviewers in any repo: relay-threat-reviewer (credential reach, secret exposure, concurrency, omitted inputs) and relay-consumer-reviewer (doc claims against code, knob tracing, linted examples, blast radius, drift). Severity-ranked, written as Conventional Comments; on a PR/MR the comments are placed inline on the diff. Use for /relay-review, review this diff, or review this MR/PR (URL or number)."
 argument-hint: "<nothing (current diff vs default branch), a branch / worktree path / file, or a PR/MR URL or number>"
 ---
 
-Dispatch the **relay-diff-reviewer** agent on the target in the `User:` text.
+Dispatch the **relay-threat-reviewer** and **relay-consumer-reviewer** agents on the target in the `User:` text.
 
 ## Steps
 
@@ -13,7 +13,7 @@ Dispatch the **relay-diff-reviewer** agent on the target in the `User:` text.
    - A branch, worktree path, or file → that. For a worktree, pass its absolute path and say every `cwd` must be there.
    - A **PR/MR** (URL, `#123` / `!123`, or `pr://` / `mr://`) → see "Reviewing a PR/MR" below.
 2. **Guidance.** Resolve `PROFILE` as in `skill://relay-feature/SKILL.md` ("Project guidance"): `.omp/relay.md` if present, else `AGENTS.md` and/or `CLAUDE.md`. For a PR/MR, read it from the PR/MR's **base** branch, not the author's head. Pass it verbatim in `context` so the reviewer applies this repo's rules. None: the reviewer uses its generic priorities.
-3. **Dispatch** two `relay-diff-reviewer` items in one `task` call's `tasks[]`, one with lens `threat`, one with lens `consumer`, each with a `solutionSpace` like `review defects open; no known bug`. Do not review inline. Shared `context`: `PROFILE`, the target, and when you have them the acceptance criteria of the linked ticket (per the repo's `## Tracker`) and the PR/MR description, whose claims are checked like any other prose. Tell them the findings must be Conventional Comments (their output format already requires this). A single file or a trivial diff may take one reviewer with no lens (it applies both).
+3. **Dispatch** both reviewers in one `task` call's `tasks[]`, one item with `agent: "relay-threat-reviewer"`, one with `agent: "relay-consumer-reviewer"`, each with a `solutionSpace` like `review defects open; no known bug`. Do not review inline. Shared `context`: `PROFILE`, the target, and when you have them the acceptance criteria of the linked ticket (per the repo's `## Tracker`) and the PR/MR description, whose claims are checked like any other prose. Tell them the findings must be Conventional Comments (their output format already requires this).
 4. **Relay the findings verbatim**, merged into one list: drop exact duplicates (same line, same cause; keep the higher severity), renumber most severe first, and end with one verdict (`needs work` if either reviewer said so). The claims, knobs, examples, and reach tables are evidence for you and the user: show them in chat, never post them. For a PR/MR, continue to "Placing the comments".
 5. **Offer follow-ups, do not perform them.** Ask before routing blocking findings to the **implementer**, missing coverage to the **test-writer**, or doc drift to **docs-sync**. On someone else's PR/MR there is nothing to route: the comments are the deliverable.
 
