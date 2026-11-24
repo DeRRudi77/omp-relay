@@ -1,7 +1,7 @@
 # Relay profile
 
 <!--
-Read by the relay-feature / relay-bug / relay-implement / relay-review / relay-grug skills and their agents
+Read by the relay-feature / relay-bug / relay-implement / relay-review / relay-grug / relay-commit skills (relay-learn maintains Recurring review findings) and their agents
 (relay-investigator, relay-bug-reproducer, relay-implementer, relay-test-writer, relay-threat-reviewer, relay-consumer-reviewer, relay-docs-sync, relay-grug).
 Facts only; verified against the repo. Delete sections that do not apply.
 Agents treat this file as outranking their generic defaults.
@@ -50,6 +50,14 @@ Non-negotiable for the implementer.
 | <e.g. behaviour change with no test> | critical |
 | <e.g. new config key undocumented> | high |
 
+## Recurring review findings
+
+<!-- Maintained by /relay-learn from human review comments on merged PRs/MRs; read by relay-threat-reviewer and relay-consumer-reviewer on every diff. Append; do not rewrite entries. -->
+
+Mined through <#n or !n>, <YYYY-MM-DD>, from <count> merged PRs/MRs.
+
+- **<Class>.** <what to check>. Examples: <paraphrase> (<#n>); <paraphrase> (<#n>).
+
 ## Complexity hot spots
 
 Where demons hide in this repo (read by `relay-grug`).
@@ -81,6 +89,7 @@ Only if the changed surface can be exercised at runtime (read by the `relay-veri
 - **Attribution**: <omit for an `Assisted-by: omp:<model>` commit trailer and PR/MR footer; `pr-only` for the footer alone; `none` for neither; or the exact trailer the repo requires>
 - **Prose pass**: <omit for none; or a skill name (e.g. `humanizer`) to run commit/PR text through>
 - **CI watch**: <omit for `on` (watch the PR/MR pipeline and fix failures); `off` to skip>
+- **Plan**: <omit when a job or bot posts the plan/CI result on the PR/MR by itself; else how to trigger it (a comment to post, a job to start) and the drift to expect. Never an apply>
 - **Review request**: <omit for `off`; or a Slack channel (archive URL, ID or `#name`) to post a review request in once the pipeline is green, optionally `; cc: <@U…>`, `; format: <first line with {url} and {sign-off}>` and `; sign-off: <emoji to pick from, or none>`>
 
 ## Tracker

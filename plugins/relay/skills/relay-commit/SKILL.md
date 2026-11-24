@@ -1,10 +1,10 @@
 ---
 name: relay-commit
-description: "Commit the current work as short Conventional Commits, push a topic branch, and open a pull request (GitHub) or merge request (GitLab, Gitea, Bitbucket, ...) on whatever forge the repo uses, then watch its pipeline and, when the repo enables it, post a review request to Slack. Replaces forge-specific commit-and-pr / commit-and-mr skills. Use for /relay-commit, commit and PR, commit and MR, open a PR/MR, or ship this. Reads the repo's Delivery settings from .omp/relay.md or AGENTS.md / CLAUDE.md. Keeps commit messages and descriptions short."
+description: "Commit the current work as short Conventional Commits, push a topic branch, and open a pull request (GitHub) or merge request (GitLab, Gitea, Bitbucket, ...) on whatever forge the repo uses, then watch its pipeline, reconcile any posted plan with the description and, when the repo enables it, post a review request to Slack. Replaces forge-specific commit-and-pr / commit-and-mr skills. Use for /relay-commit, commit and PR, commit and MR, open a PR/MR, or ship this. Reads the repo's Delivery settings from .omp/relay.md or AGENTS.md / CLAUDE.md. Keeps commit messages and descriptions short."
 argument-hint: "<optional: notes for the description, or a ticket key>"
 ---
 
-Phases: **commit**, **publish**, **watch the pipeline**, and, when the repo turns it on, **request review** in Slack. All are governed by one rule, and all take their settings from the repo.
+Phases: **commit**, **publish**, **watch the pipeline** (and reconcile its plan), and, when the repo turns it on, **request review** in Slack. All are governed by one rule, and all take their settings from the repo.
 
 ## Settings
 
@@ -26,6 +26,7 @@ Settings this skill reads:
 | **Attribution** | an `Assisted-by` commit trailer plus a PR/MR footer; `pr-only`, `none` or a repo-specified trailer change that, as in [Attribution](#attribution) |
 | **Prose pass** | none; if the setting names a skill (e.g. `humanizer`), run commit subjects/bodies and the PR/MR title/description through it after shortening, preserving syntax, issue references, commands, code blocks and facts |
 | **CI watch** | `on`: after opening the PR/MR, watch its pipeline and fix failures (Phase 3). `off` skips it |
+| **Plan** | none: read whatever plan or CI result a job or bot posts on the PR/MR. A line saying how the plan is triggered (a comment to post, a job to start) or where it appears is followed instead |
 | **Review request** | `off`. A Slack channel turns it on: after publishing, post a review request there (Phase 4). Optional `cc:`, `format:` and `sign-off:` parts, as in [Phase 4](#phase-4-request-review) |
 
 When another skill (`relay-feature`, `relay-bug`) calls this one, it may also pass the commit type to use, content the description must include, and that the user already approved pushing.
@@ -130,11 +131,13 @@ Run long waits as a background job or with a generous timeout; do not stop on th
    - **Unrelated or pre-existing** (fails the same way on the base branch, or touches code the diff does not): do not fix it inside this change. Report it in chat with the job name and the evidence.
 3. Watch the new pipeline and repeat.
 
-**Stop conditions:** pipeline green; three fix attempts on the same job without progress; a failure that needs a user decision (credentials, product behaviour, scope); or an unrelated failure. Then report in chat: PR/MR URL, which job failed, the cause, what you tried. Green: one line, then Phase 4.
+**Stop conditions:** pipeline green; three fix attempts on the same job without progress; a failure that needs a user decision (credentials, product behaviour, scope); or an unrelated failure. Then report in chat: PR/MR URL, which job failed, the cause, what you tried. Green: one line, then reconcile the plan, then Phase 4.
+
+**Reconcile the plan.** After green, or right after opening when the watch is skipped, read the infrastructure plan or CI result posted on the PR/MR (a plan comment, a check's summary). If the **Plan** setting says it needs a trigger, trigger it once and wait; never trigger an apply. None appears: skip. Compare it with the diff and the description, then edit the description (`gh pr edit <n> --body-file`, `glab mr update <iid> --description`, or the API), one line per item: **Apply side effects** the diff does not show (a resource replaced, a service restarted or redeployed), and **Unrelated drift** (changes not caused by this branch), kept apart. A plan that destroys or replaces something the change should not touch: stop and report it in chat; no Phase 4.
 
 ## Phase 4: Request review
 
-Only when the **Review request** setting names a channel; it is off by default. Post once, when this run opened the PR/MR: a run that pushed to an existing one does not post again. Post after Phase 3 ends green, or right after opening when Phase 3 was skipped. A red pipeline means no post; say so in chat, since reviewers should not be asked to look at a failing change.
+Only when the **Review request** setting names a channel; it is off by default. Post once, when this run opened the PR/MR: a run that pushed to an existing one does not post again. Post after Phase 3 ends green and the plan is reconciled, or right after opening (and reconciling) when the watch was skipped. A red pipeline means no post; say so in chat, since reviewers should not be asked to look at a failing change.
 
 The setting is the channel, then optional parts separated by `;`:
 
@@ -168,7 +171,7 @@ cc: <@U0123ABCD> <!subteam^S0123ABCD>
 
 ## Guardrails
 
-- Anything you turn up along the way (a bug, a scope question, a decision for the user) goes in chat, not into the description or the Slack message. That pressure is what inflates descriptions.
+- Anything you turn up along the way (a bug, a scope question, a decision for the user) goes in chat, not into the description or the Slack message. That pressure is what inflates descriptions. The plan's side effects and drift are the exception: reviewers need them.
 - Match the base branch the repo actually uses; do not assume `main`.
 - Never force-push, and never push to the base branch.
 - Never add `Signed-off-by`: only a human can certify the DCO.

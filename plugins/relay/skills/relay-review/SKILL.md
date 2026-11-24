@@ -1,6 +1,6 @@
 ---
 name: relay-review
-description: "Review a diff, branch, worktree, file, or a GitHub PR / GitLab MR with two parallel reviewers in any repo: relay-threat-reviewer (credential reach, secret exposure, concurrency, omitted inputs) and relay-consumer-reviewer (doc claims against code, knob tracing, linted examples, blast radius, drift). Severity-ranked, written as Conventional Comments; on a PR/MR the comments are placed inline on the diff. Use for /relay-review, review this diff, or review this MR/PR (URL or number)."
+description: "Review a diff, branch, worktree, file, or a GitHub PR / GitLab MR with two parallel reviewers in any repo: relay-threat-reviewer (credential reach and platform prerequisites, secret exposure, concurrency and replay, omitted inputs) and relay-consumer-reviewer (doc claims and cross-references against code, knob tracing, linted examples and runbooks, test strength, blast radius, drift). Severity-ranked, written as Conventional Comments; on a PR/MR the comments are placed inline on the diff. Use for /relay-review, review this diff, or review this MR/PR (URL or number)."
 argument-hint: "<nothing (current diff vs default branch), a branch / worktree path / file, or a PR/MR URL or number>"
 ---
 

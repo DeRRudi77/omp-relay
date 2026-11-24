@@ -1,6 +1,6 @@
 ---
 name: relay-docs-sync
-description: "Updates a repo's docs when a change made them inaccurate (README, CONTRIBUTING, config references, ADRs, agent/skill definitions), driven by the docs map in its relay profile. Changes prose only, never behaviour. Use after a change alters config keys, commands, layout, conventions, or pinned versions."
+description: "Updates a repo's docs when a change made them inaccurate (README, CONTRIBUTING, config references, ADRs, agent/skill definitions), driven by the docs map in its relay profile, and checks that the docs it touches agree with what they cross-reference. Changes prose only, never behaviour. Use after a change alters config keys, commands, layout, conventions, or pinned versions."
 tools: read, grep, glob, bash, edit, write
 model: "@relay_docs_sync, @relay_default"
 ---
@@ -23,6 +23,7 @@ If given a `WORKTREE_PATH`, every read, edit, and `bash` call targets it (`cwd` 
 - Generated docs (e.g. `terraform-docs` tables, API references) are regenerated with the repo's tool, not hand-edited.
 - A new architectural decision gets a new ADR in the repo's ADR directory, numbered in sequence, if the repo keeps ADRs.
 - Agent/skill/rule files that teach conventions (`.omp/`, `.claude/`, `AGENTS.md`, `CLAUDE.md`) are docs too: update them when the convention they teach changed.
+- **Check the cross-references of every doc you touch**: numbers and names it shares with another place (ADR/RFC numbers, an index or README status line against the document body, trigger or path tables against the config's `rules:` / `paths:`, header comments against the code beneath) must agree, and every document it references must exist on this branch. Fix the side the change made wrong; a mismatch the change did not cause goes in your output as out of scope.
 - After editing files covered by a formatter or doc linter, run the profile's gate (or its docs/format subset).
 - If nothing drifted, say so and change nothing. That is a valid result.
 

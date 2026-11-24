@@ -63,7 +63,7 @@ Update docs the change made inaccurate, per the profile's **Docs map**. This run
 Run "Sync with the base branch" from `skill://relay-feature/references/worktree.md` yourself. Conflicts go to `relay-implementer` as described there, then the gate. Report `base unchanged` or `merged N commits from origin/<base>`, and any conflicts resolved. Then take a snapshot (same file, "Snapshot") and record its id as `REVIEWED`.
 
 ### 10. Review: `relay-threat-reviewer` and `relay-consumer-reviewer` in parallel
-Dispatch both in one `tasks[]` batch: **`relay-threat-reviewer`** (credential reach, secret exposure, concurrency and ordering, omitted inputs) and **`relay-consumer-reviewer`** (every prose claim against the code, every knob traced to its consumers, every executable example linted). Each has its own model role, so the two lenses can run on different models. Both get the same `context`:
+Dispatch both in one `tasks[]` batch: **`relay-threat-reviewer`** (credential reach and its platform prerequisites, secret exposure, concurrency, replay and ordering, omitted inputs) and **`relay-consumer-reviewer`** (every prose claim and cross-reference against the code, every knob traced to its consumers, every executable example linted, every new test checked for what it would miss). Each has its own model role, so the two lenses can run on different models. Both get the same `context`:
 - `PROFILE`, whose **Review priorities** apply;
 - the approved plan, and the ticket's acceptance criteria verbatim (its "Done when" section or equivalent), if the input was a ticket;
 - the text of the ADRs and design docs from step 3;
