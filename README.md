@@ -11,7 +11,6 @@ Repo-agnostic change pipelines for omp. An orchestrator skill dispatches special
 | `/relay-grug` | complexity review |
 | `/relay-verify` | drive a change in a real browser (omp's own isolated one) to confirm it renders, behaves, has no new console errors, and respects isolation boundaries |
 | `/relay-init` | create or refresh a repo's `.omp/relay.md` profile |
-| `/relay-learn` | mine the human review comments on recently merged PRs/MRs (batched GraphQL, stops on a rate limit) and append the recurring classes to the profile's Recurring review findings, which both reviewers check on every diff |
 | `/relay-commit` | commit (short Conventional Commits), push, open a PR (GitHub) or MR (GitLab, others) with a CLI-to-API fallback; then watches the pipeline and fixes failures itself; adds the plan's apply side effects and unrelated drift to the description when a plan is posted; optionally posts a review request to Slack; also what `/relay-feature` and `/relay-bug` end with |
 
 Agents: `relay-investigator`, `relay-bug-reproducer`, `relay-implementer`, `relay-test-writer`, `relay-verifier`, `relay-threat-reviewer`, `relay-consumer-reviewer`, `relay-docs-sync`, `relay-grug`.
@@ -61,7 +60,7 @@ Run `/reload-plugins` in a running session.
 
 The plugin has no settings of its own. omp's plugin settings (`omp plugin config`) are for extension modules; skills are plain markdown and cannot read them, and the things that vary here (gate command, PR recipe, tracker) differ per repo anyway. Everything lives in `<repo>/.omp/relay.md`, which the skills and agents read first. Without it they fall back to the repo's `AGENTS.md` / `CLAUDE.md`. Run `/relay-init` to draft one from the repo, or start from [the template](plugins/relay/skills/relay-init/templates/relay.md).
 
-Sections: Gate, Layers, Hard rules, Test conventions, Review priorities, Recurring review findings (maintained by `/relay-learn`), Complexity hot spots, Docs map, Verify, Delivery, Tracker, Worktree, Conditional skills. All optional.
+Sections: Gate, Layers, Hard rules, Test conventions, Review priorities, Complexity hot spots, Docs map, Verify, Delivery, Tracker, Worktree, Conditional skills. All optional.
 
 Ticket trackers are not built in. A `## Tracker` section tells the skills how to detect, fetch and update tickets with whatever MCP tools you have mounted; see [tracker.md](plugins/relay/skills/relay-feature/references/tracker.md).
 

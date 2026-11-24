@@ -1,7 +1,7 @@
 # Relay profile
 
 <!--
-Read by the relay-feature / relay-bug / relay-implement / relay-review / relay-grug / relay-commit skills (relay-learn maintains Recurring review findings) and their agents
+Read by the relay-feature / relay-bug / relay-implement / relay-review / relay-grug / relay-commit skills and their agents
 (relay-investigator, relay-bug-reproducer, relay-implementer, relay-test-writer, relay-threat-reviewer, relay-consumer-reviewer, relay-docs-sync, relay-grug).
 Facts only; verified against the repo. Delete sections that do not apply.
 Agents treat this file as outranking their generic defaults.
@@ -49,14 +49,6 @@ Non-negotiable for the implementer.
 |---|---|
 | <e.g. behaviour change with no test> | critical |
 | <e.g. new config key undocumented> | high |
-
-## Recurring review findings
-
-<!-- Maintained by /relay-learn from human review comments on merged PRs/MRs; read by relay-threat-reviewer and relay-consumer-reviewer on every diff. Append; do not rewrite entries. -->
-
-Mined through <#n or !n>, <YYYY-MM-DD>, from <count> merged PRs/MRs.
-
-- **<Class>.** <what to check>. Examples: <paraphrase> (<#n>); <paraphrase> (<#n>).
 
 ## Complexity hot spots
 
