@@ -7,13 +7,19 @@ Repo-agnostic change pipelines for omp. An orchestrator skill dispatches special
 | `/relay-feature` | investigate → implement → complexity check → test → browser verify (when runnable) → docs-sync → merge the base branch → two-lens review (threat; consumer/docs) → fix or record every finding, re-reviewing each rework → commit and PR/MR |
 | `/relay-bug` | like `/relay-feature`, but a failing repro test must exist (red) before any fix is written |
 | `/relay-implement` | implement an approved plan in a worktree, no test/review/docs pipeline |
-| `/relay-review` | read-only review of a diff, branch, worktree, file, or PR/MR by two parallel reviewers (threat; consumer/docs); findings are Conventional Comments, placed inline on a PR/MR |
+| `/relay-review` | read-only review of a diff, branch, worktree, file, or PR/MR by two parallel reviewers (threat; consumer/docs); findings use Conventional Comments |
 | `/relay-grug` | complexity review |
 | `/relay-verify` | drive a change in a real browser (omp's own isolated one) to confirm it renders, behaves, has no new console errors, and respects isolation boundaries |
 | `/relay-init` | create or refresh a repo's `.omp/relay.md` profile |
 | `/relay-commit` | commit (short Conventional Commits), push, open a PR (GitHub) or MR (GitLab, others) with a CLI-to-API fallback; then watches the pipeline and fixes failures itself; adds the plan's apply side effects and unrelated drift to the description when a plan is posted; optionally posts a review request to Slack; also what `/relay-feature` and `/relay-bug` end with |
 
 Agents: `relay-investigator`, `relay-bug-reproducer`, `relay-implementer`, `relay-test-writer`, `relay-verifier`, `relay-threat-reviewer`, `relay-consumer-reviewer`, `relay-docs-sync`, `relay-grug`.
+
+Both lenses use the same [review policy](plugins/relay/skills/relay-review/references/review-policy.md) instead of blanket blocking floors. Category, severity and reachability are assessed separately. The profile's `Review priorities` sets severity for matching findings, not whether they block. A finding blocks only with concrete evidence of a reachable, material defect outside any explicitly accepted risk bound.
+
+Posting a PR/MR review requires the complete diff pinned to the merge base and head, read from local Git objects, and the complete review history. A forge-rendered diff does not establish coverage. Incomplete reviews, including when the policy cannot be loaded, are chat-only: any findings are shown without a verdict, and nothing is posted.
+
+On a PR/MR, standalone `/relay-review` runs a full review unless you give or confirm a baseline: the reviewed head, the target branch and merge base it was reviewed on, the guidance, linked criteria and other authoritative inputs that review used, and that review's findings still open with their dispositions (or that there were none). With a baseline whose merge base and governing inputs still match and whose head is an ancestor of the current head, it reviews only the delta, or only the earlier findings when the head is unchanged; otherwise it runs a full review and says why. It never takes a baseline from the PR/MR history. Existing threads, review comments and PR Conversation comments are evidence, not a baseline: a finding with the same root cause is reassessed rather than posted again, and a resolved thread or an author's reply never closes or accepts one. Posting is capped at five new findings across inline comments and the summary, blockers first. Chat still shows all findings. The summary lists unposted blockers and the state of every earlier finding, and the verdict counts every blocker. Before each write it checks the revision again and any accepted risk bound the verdict relies on, and asks again if either changed.
 
 Every skill and agent is prefixed `relay-`. omp does not namespace agents, and it gives a clashing skill name to whichever source ranks higher, which would break the skills' links to each other (`skill://relay-feature/references/...`). Invoke a skill as `/skill:relay-bug`.
 
