@@ -77,11 +77,11 @@ As step 9 of `skill://relay-feature`: merge `origin/<base>` per its worktree ref
 As step 10 of `skill://relay-feature` (both reviewers, same context for both). Add to both tasks: judge whether the fix addresses the root cause or only masks the symptom, and whether the repro test would have caught the original bug. The expected-vs-actual statement and root cause go in `context` alongside the plan.
 
 ### 11. Resolve findings
-As step 11 of `skill://relay-feature`: every `issue` and every blocking finding is fixed, deferred with a reason, or the user's call; rework tasks carry the constraints from this skill's "Rework goes to the implementer"; after rework re-run 6, 7 (if it applies) and 8, then a delta re-review. Nothing reaches step 12 unreviewed; after three delta rounds without convergence, stop and show the user the open findings.
+As step 11 of `skill://relay-feature`: every `issue` and every blocking finding is fixed, deferred with a reason (non-blocking only), accepted by the user with its bound, rejected by the user, or the user's call; rework tasks carry the constraints from this skill's "Rework goes to the implementer"; after rework re-run 6, 7 (if it applies) and 8, then a delta re-review that carries every finding not yet `closed` with its resolution, as that step describes. Nothing reaches step 12 unreviewed; after three delta rounds without convergence, stop and show the user the open findings.
 
 ### 12. Commit and PR/MR
 **Confirm with the user first** (`ask`); this pushes a branch and opens a PR/MR.
-- Follow `skill://relay-commit`, from inside the worktree and with the user's approval to push already given: commit, push, open the PR/MR. Pass it: commit type **`fix`** (`fix!` if breaking), e.g. `fix(auth): reject expired refresh tokens`; and that the description must include the expected-vs-actual symptom, the root cause, the repro test that now guards it, and the deferred findings as an "Open review findings" list (subject and reason, one line each).
+- Follow `skill://relay-commit`, from inside the worktree and with the user's approval to push already given: commit, push, open the PR/MR. Pass it: commit type **`fix`** (`fix!` if breaking), e.g. `fix(auth): reject expired refresh tokens`; and that the description must include the expected-vs-actual symptom, the root cause, the repro test that now guards it, and the deferred and accepted findings as an "Open review findings" list (one line each: subject and reason for a deferred one, subject, who accepted it and its bound for an accepted one).
 - Capture the URL. Run the tracker **Review** event (comment the URL, set the review status), if the input was a ticket and the repo configures one. Never block the fix on it.
 
 ### 13. Finalize

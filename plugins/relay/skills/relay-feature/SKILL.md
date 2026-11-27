@@ -69,23 +69,25 @@ Dispatch both in one `tasks[]` batch: **`relay-threat-reviewer`** (credential re
 - the text of the ADRs and design docs from step 3;
 - the target: the full change, `git diff $(git merge-base origin/<base> HEAD)` plus the untracked files `git ls-files --others --exclude-standard` lists (docs-sync's edits included), and the worktree line.
 
-Relay both verdicts and all findings verbatim. The tables can be summarised as counts (`14 claims, 1 contradicted; 3 knobs, 1 gap`).
+Relay both verdicts and all findings verbatim. The tables can be summarised as counts (`14 claims, 1 contradicted; 3 knobs, 1 gap`). A reviewer that ends `incomplete: review policy unavailable` gave no verdict: the round is incomplete, whatever the other reviewer said. Stop and tell the user; never treat it as a pass.
 
 ### 11. Resolve findings
 Every finding labelled `issue`, and every `(blocking)` finding whatever its label, ends in exactly one of these:
 - **Fixed** (the default): dispatch `relay-implementer` per "Rework goes to the implementer", with the finding verbatim. When the reviewer's fix direction only narrows the problem and the finding says so, ask for the fix that closes it.
-- **Deferred** (non-blocking only): the finding's subject and a one-line reason go into the PR/MR description under "Open review findings" (step 12).
-- **User's call**: `ask` with the finding verbatim, your reasoning, and the options fix / defer with reason / reject. Required for every blocking finding you would not fix, and for every finding you believe is wrong.
+- **Deferred** (non-blocking only): the finding's subject and a one-line reason go into the PR/MR description under "Open review findings" (step 12). A deferral is not acceptance: the finding stays open, and a later round that determines it blocking sends it back here.
+- **Accepted** (the user's decision only): the user accepts this specific residual risk and states its bound (which inputs or paths, which consequence, for how long). Record who accepted it and the quote. Without a bound it is not acceptance; ask again.
+- **Rejected** (the user's decision only): the user says the finding is wrong. Record the reason.
+- **User's call**: `ask` with the finding verbatim, your reasoning, and the options fix / defer with reason (non-blocking only) / accept with its bound / reject. Required for every blocking finding you would not fix, and for every finding you believe is wrong.
 
 A `question` you cannot answer from the code goes to the user. A `todo` for docs goes to `relay-docs-sync`. A `suggestion` or `nitpick` is your call; name the ones you skip in the phase summary.
 
-After rework, re-run step 6 if the implementation changed, step 7 if runtime behaviour changed and the step applies, and step 8 on the rework. Then take a fresh snapshot, `CURRENT`, and run a **delta re-review**: both reviewers again in one batch, `context` carrying `PROFILE`, the step 10 inputs, the tree ids `REVIEWED` and `CURRENT`, and how each finding was resolved; each reviewer's `task` carries the findings its lens raised, verbatim. Each reviews only `git diff REVIEWED CURRENT`, says whether each of its findings is closed, and reports what the rework broke. Their findings go through this step again; then `CURRENT` becomes `REVIEWED`.
+After rework, re-run step 6 if the implementation changed, step 7 if runtime behaviour changed and the step applies, and step 8 on the rework. Then take a fresh snapshot, `CURRENT`, and run a **delta re-review**: both reviewers again in one batch, `context` carrying `PROFILE`, the step 10 inputs, today's date, and the tree ids `REVIEWED` and `CURRENT`. Each reviewer's `task` carries every finding its lens raised that is not yet `closed`, verbatim, with its resolution: fixed (what changed), deferred with its reason, accepted with the user's quote and bound, or rejected with the user's reason. For a bound that ends at a release or another named event, add current evidence of whether it has happened (the release or tag itself, the tracker item), or say you could not get it; the policy treats an unverified bound as not holding. Each reviews only `git diff REVIEWED CURRENT`, gives each carried finding the policy's state and current blocking determination, and reports what the rework broke. A carried finding left without a state or a blocking determination makes the round incomplete, as in step 10. New findings, and carried ones still `(blocking)`, go through this step again; then `CURRENT` becomes `REVIEWED`.
 
 Nothing reaches step 12 unreviewed: any worktree change after the last review (rework, docs-sync, a conflict resolution) gets a delta re-review. After three delta rounds without convergence, stop and show the user the open findings.
 
 ### 12. Commit and PR/MR
 **Confirm with the user first** (`ask`); this pushes a branch and opens a PR/MR.
-- Follow `skill://relay-commit`, from inside the worktree and with the user's approval to push already given: commit, push, open the PR/MR. Its Delivery settings come from the profile; the commit type must match the real blast radius (behaviour change = `feat`/`fix`, not `chore`). Pass the deferred findings as required description content: an "Open review findings" list, one line each, subject and reason.
+- Follow `skill://relay-commit`, from inside the worktree and with the user's approval to push already given: commit, push, open the PR/MR. Its Delivery settings come from the profile; the commit type must match the real blast radius (behaviour change = `feat`/`fix`, not `chore`). Pass the deferred and accepted findings as required description content: an "Open review findings" list, one line each: subject and reason for a deferred one, subject, who accepted it and its bound for an accepted one.
 - Capture the URL. Run the tracker **Review** event (comment the URL, set the review status), if the input was a ticket and the repo configures one. Never block the change on it.
 
 ### 13. Finalize

@@ -43,7 +43,9 @@ Non-negotiable for the implementer.
 
 ## Review priorities
 
-`relay-threat-reviewer` and `relay-consumer-reviewer` rate some findings `high` and blocking whatever this table says: doc claims the code contradicts, crashes on an omitted input, failing examples, ignored knobs, unmet acceptance criteria, credential over-reach, unguarded concurrent runs. Rows here can raise those, not lower them.
+`relay-threat-reviewer` and `relay-consumer-reviewer` use these rows to set severity for matching findings, independently of category and reachability. For PR/MR review, the profile comes from the base branch.
+
+Blocking follows `skill://relay-review/references/review-policy.md`, not a severity floor. A finding blocks only with concrete evidence of a reachable, material defect outside any explicitly accepted risk bound. A row here neither creates nor waives a blocker.
 
 | Finding | Severity |
 |---|---|
